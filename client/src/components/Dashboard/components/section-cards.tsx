@@ -21,8 +21,10 @@ export function SectionCards() {
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
-                            <IconTrendingUp />
-                            +12.5%
+                            <IconTrendingUp className="text-green-500 dark:text-green-400" />
+                            <span className="text-green-500 dark:text-green-400">
+                                +12.5%
+                            </span>
                         </Badge>
                     </CardAction>
                 </CardHeader>
@@ -44,8 +46,10 @@ export function SectionCards() {
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
-                            <IconTrendingDown />
-                            -20%
+                            <IconTrendingDown className="text-red-500 dark:text-red-400" />
+                            <span className="text-red-500 dark:text-red-400">
+                                -20%
+                            </span>
                         </Badge>
                     </CardAction>
                 </CardHeader>
@@ -67,8 +71,10 @@ export function SectionCards() {
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
-                            <IconTrendingUp />
-                            +12.5%
+                            <IconTrendingUp className="text-green-500 dark:text-green-400" />
+                            <span className="text-green-500 dark:text-green-400">
+                                +12.5%
+                            </span>{" "}
                         </Badge>
                     </CardAction>
                 </CardHeader>
@@ -90,8 +96,10 @@ export function SectionCards() {
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
-                            <IconTrendingUp />
-                            +4.5%
+                            <IconTrendingUp className="text-green-500 dark:text-green-400" />
+                            <span className="text-green-500 dark:text-green-400">
+                                +12.5%
+                            </span>{" "}
                         </Badge>
                     </CardAction>
                 </CardHeader>
