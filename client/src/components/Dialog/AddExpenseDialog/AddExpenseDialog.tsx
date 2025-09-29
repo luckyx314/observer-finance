@@ -14,6 +14,7 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { Label } from "@/components/ui/label"; // ✅ use shadcn’s label wrapper
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import SelectCategory from "@/components/Select/SelectCategory";
+import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
 
 interface AddSpendingDialogProps {
     label?: string;
@@ -46,10 +47,18 @@ const AddExpenseDialog = ({
                     </DialogHeader>
 
                     <div className="grid gap-4">
-                        <div className="grid gap-3">
-                            <Label htmlFor="category-1">Category</Label>
-                            <SelectCategory />
+                        <div className="flex gap-5">
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="category-1">Category</Label>
+                                <SelectCategory />
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="date-picker-1">Date</Label>
+                                <DatePickerComponent />
+                            </div>
                         </div>
+
                         <div className="grid gap-3">
                             <Label htmlFor="merchant-1">Merchant</Label>
                             <Input

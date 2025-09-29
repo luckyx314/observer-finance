@@ -49,7 +49,6 @@ import type {
     VisibilityState,
 } from "@tanstack/react-table";
 
-import { toast } from "sonner";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,7 +62,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -186,25 +184,12 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         accessorKey: "amount",
         header: "Amount",
         cell: ({ row }) => (
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1000)),
-                        {
-                            loading: `Saving ${row.original.amount}`,
-                            success: "Done",
-                            error: "Error",
-                        }
-                    );
-                }}
+            <Label
+                htmlFor={`${row.original.id}-target`}
+                className="text-sm font-medium"
             >
-                <Input
-                    defaultValue={row.original.amount}
-                    id={`${row.original.id}-target`}
-                    className="w-24 text-sm"
-                />
-            </form>
+                {row.original.amount}
+            </Label>
         ),
     },
     {
