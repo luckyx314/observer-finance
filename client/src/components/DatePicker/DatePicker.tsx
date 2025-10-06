@@ -21,7 +21,7 @@ export function DatePickerComponent() {
                 <Button
                     variant="outline"
                     data-empty={!date}
-                    className="data-[empty=true]:text-muted-foreground w-[100%] justify-start text-left font-normal"
+                    className="data-[empty=true]:text-muted-foreground"
                 >
                     <CalendarIcon />
                     {date ? format(date, "PPP") : <span>Pick a date</span>}
