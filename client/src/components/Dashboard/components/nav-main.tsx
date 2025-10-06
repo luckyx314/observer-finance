@@ -8,7 +8,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import AddExpenseDialog from "@/components/Dialog/AddExpenseDialog/AddExpenseDialog";
+import AddTransactionDialog from "@/components/Dialog/AddTransactionDialog/AddTrannsactionDialog";
 import { Link } from "react-router-dom";
 
 export function NavMain({
@@ -25,9 +25,9 @@ export function NavMain({
             <SidebarGroupContent className="flex flex-col gap-2">
                 <SidebarMenu>
                     <SidebarMenuItem className="flex items-center gap-2">
-                        <AddExpenseDialog>
+                        <AddTransactionDialog>
                             {/* Custom form or content here */}
-                        </AddExpenseDialog>
+                        </AddTransactionDialog>
                         <Button
                             size="icon"
                             className="size-8 group-data-[collapsible=icon]:opacity-0"

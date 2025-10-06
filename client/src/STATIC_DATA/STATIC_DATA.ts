@@ -5,3 +5,11 @@ export const categories = [
     "Subscription",
     "Bills",
 ];
+
+export const transactionType = [
+    "Expense",
+    "Income",
+    "Savings",
+    "Liability",
+    "Investment",
+];

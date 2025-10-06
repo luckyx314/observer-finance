@@ -13,18 +13,24 @@ import { Input } from "@/components/ui/input";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { Label } from "@/components/ui/label"; // ✅ use shadcn’s label wrapper
 import { IconCirclePlusFilled } from "@tabler/icons-react";
-import SelectCategory from "@/components/Select/SelectCategory";
+import SelectComponent from "@/components/Select/SelectComponent";
 import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
+import { categories, transactionType } from "@/STATIC_DATA/STATIC_DATA";
+import { useState } from "react";
 
 interface AddSpendingDialogProps {
     label?: string;
     icon?: React.ReactNode;
 }
 
-const AddExpenseDialog = ({
-    label = "Add Expense",
+const AddTransactionDialog = ({
+    label = "Add Transaction",
     icon = <IconCirclePlusFilled />,
 }: AddSpendingDialogProps) => {
+    const [title, setTitle] = useState("Transaction");
+    const handleTypeChange = (value: string) => {
+        setTitle(value);
+    };
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -40,20 +46,31 @@ const AddExpenseDialog = ({
             <DialogContent className="sm:max-w-[425px]">
                 <form className="space-y-6">
                     <DialogHeader>
-                        <DialogTitle>Add Expense</DialogTitle>
+                        <DialogTitle>Add {title}</DialogTitle>
                         <DialogDescription>
                             Add a new expense to be tracked.
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4">
-                        <div className="flex gap-5">
-                            <div className="flex flex-col gap-3">
+                        <div className="grid gap-3">
+                            <Label htmlFor="merchant-1">Transaction Type</Label>
+                            <SelectComponent
+                                items={transactionType}
+                                label="Transaction Type"
+                                onChange={handleTypeChange}
+                            />
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-5 w-full">
+                            <div className="flex flex-col gap-3 flex-1">
                                 <Label htmlFor="category-1">Category</Label>
-                                <SelectCategory />
+                                <SelectComponent
+                                    items={categories}
+                                    label="Category"
+                                />
                             </div>
 
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-3 flex-1">
                                 <Label htmlFor="date-picker-1">Date</Label>
                                 <DatePickerComponent />
                             </div>
@@ -64,7 +81,7 @@ const AddExpenseDialog = ({
                             <Input
                                 id="merchant-1"
                                 name="merchant"
-                                defaultValue="Jollibee"
+                                placeholder="ex. Jollibee"
                             />
                         </div>
                         <div className="grid gap-3">
@@ -72,7 +89,8 @@ const AddExpenseDialog = ({
                             <Input
                                 id="amount-1"
                                 name="amount"
-                                defaultValue="0.00"
+                                placeholder="0.00"
+                                type="number"
                             />
                         </div>
                     </div>
@@ -89,4 +107,4 @@ const AddExpenseDialog = ({
     );
 };
 
-export default AddExpenseDialog;
+export default AddTransactionDialog;
