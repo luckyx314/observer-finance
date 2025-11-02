@@ -1,29 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CreateTransactionDto,
-  TransactionType,
-} from './dto/create-transaction.dto';
+import { TransactionType } from './dto/create-transaction.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
-
-export interface Transaction extends CreateTransactionDto {
-  trans_id: number;
-  income?: {
-    source: string;
-    description: string;
-  };
-  expense?: {
-    merchant: string;
-    category: string;
-  };
-  saving?: {
-    source: string;
-    description: string;
-  };
-  liability?: {
-    creditor: string;
-    due_date: string;
-  };
-}
+import { Transaction } from './entities/transaction.entity';
 
 @Injectable()
 export class TransactionService {
@@ -102,16 +80,16 @@ export class TransactionService {
     );
   }
 
-  addExpense(data: CreateExpenseDto): Transaction {
+  addExpense(expense: CreateExpenseDto): Transaction {
     const newTransaction: Transaction = {
       trans_id: this.transactions.length + 1,
-      user_id: data.user_id,
-      amount: data.amount,
-      date: data.date,
+      user_id: expense.user_id,
+      amount: expense.amount,
+      date: expense.date,
       trans_type: TransactionType.EXPENSE,
       expense: {
-        merchant: data.merchant,
-        category: data.category,
+        merchant: expense.merchant,
+        category: expense.category,
       },
     };
 
