@@ -17,11 +17,22 @@ import { AppSidebar } from "@/components/Dashboard/components/app-sidebar";
 import { SiteHeader } from "@/components/Dashboard/components/site-header";
 import { IconUser, IconMail, IconLock } from "@tabler/icons-react";
 import { userAPI } from "@/services/api";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Account() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [user, setUser] = useState({
         email: "",
         firstName: "",
@@ -83,12 +94,6 @@ export default function Account() {
 
     const handleDeleteAccount = async () => {
         if (deleteLoading) return;
-        const confirmed = window.confirm(
-            "Deleting your account is permanent and cannot be undone. Continue?"
-        );
-        if (!confirmed) {
-            return;
-        }
         setDeleteLoading(true);
         try {
             await userAPI.deleteAccount();
@@ -108,10 +113,12 @@ export default function Account() {
         } finally {
             setDeleteLoading(false);
         }
+        setDeleteDialogOpen(false);
     };
 
     return (
-        <SidebarProvider
+        <>
+            <SidebarProvider
             style={
                 {
                     "--sidebar-width": "calc(var(--spacing) * 72)",
@@ -301,10 +308,10 @@ export default function Account() {
                                     </div>
                                     <Button
                                         variant="destructive"
-                                        onClick={handleDeleteAccount}
+                                        onClick={() => setDeleteDialogOpen(true)}
                                         disabled={deleteLoading}
                                     >
-                                        {deleteLoading ? "Deleting..." : "Delete Account"}
+                                        Delete Account
                                     </Button>
                                 </div>
                             </CardContent>
@@ -315,5 +322,27 @@ export default function Account() {
                 </div>
             </SidebarInset>
         </SidebarProvider>
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Delete account?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action permanently removes your account and all associated
+                        data. This cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={deleteLoading}
+                    >
+                        {deleteLoading ? "Deleting..." : "Delete"}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }

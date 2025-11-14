@@ -14,7 +14,7 @@ interface BudgetCategoryListProps {
     budgets: ComputedBudget[];
     periodLabel: string;
     formatCurrency: (value: number) => string;
-    onDeleteBudget?: (id: number) => void | Promise<void>;
+    onDeleteBudget?: (budget: ComputedBudget) => void | Promise<void>;
 }
 
 export function BudgetCategoryList({
@@ -99,11 +99,11 @@ export function BudgetCategoryList({
                                 {onDeleteBudget && (
                                     <Button
                                         type="button"
-                                        variant="ghost"
+                                        variant="outline"
                                         size="icon"
-                                        onClick={() => onDeleteBudget(budget.id)}
-                                        className="text-muted-foreground hover:text-destructive"
+                                        onClick={() => onDeleteBudget(budget)}
                                         aria-label={`Delete ${budget.label} budget`}
+                                        className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
                                     >
                                         <IconTrash className="size-4" />
                                     </Button>

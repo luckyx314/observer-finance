@@ -37,6 +37,16 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -67,6 +77,13 @@ export default function Budgets() {
     const [payments, setPayments] = useState<PaymentReminder[]>([]);
     const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+    const [editingPayment, setEditingPayment] = useState<PaymentReminder | null>(null);
+    const [budgetToDelete, setBudgetToDelete] = useState<Budget | null>(null);
+    const [paymentToDelete, setPaymentToDelete] = useState<PaymentReminder | null>(null);
+    const [budgetDeleteDialogOpen, setBudgetDeleteDialogOpen] = useState(false);
+    const [paymentDeleteDialogOpen, setPaymentDeleteDialogOpen] = useState(false);
+    const [budgetDeleting, setBudgetDeleting] = useState(false);
+    const [paymentDeleting, setPaymentDeleting] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -260,30 +277,93 @@ export default function Budgets() {
         }
     };
 
-    const handleAddPayment = async (input: PaymentReminderInput) => {
+    const handleSavePayment = async (
+        input: PaymentReminderInput,
+        reminderId?: number
+    ) => {
         try {
-            const created = await paymentReminderAPI.create(input);
-            setPayments((previous) => [...previous, created]);
-            toast.success("Payment reminder saved");
+            if (reminderId) {
+                const updated = await paymentReminderAPI.update(reminderId, input);
+                setPayments((previous) =>
+                    previous.map((payment) =>
+                        payment.id === reminderId ? updated : payment
+                    )
+                );
+                toast.success("Payment reminder updated");
+            } else {
+                const created = await paymentReminderAPI.create(input);
+                setPayments((previous) => [...previous, created]);
+                toast.success("Payment reminder saved");
+            }
             return true;
         } catch (error) {
-            console.error("Failed to create payment reminder", error);
+            console.error("Failed to save payment reminder", error);
             toast.error("Unable to save reminder, please try again.");
             return false;
         }
     };
 
-    const handleDeleteBudget = async (id: number) => {
+    const requestBudgetDeletion = (budget: ComputedBudget) => {
+        setBudgetToDelete(budget);
+        setBudgetDeleteDialogOpen(true);
+    };
+
+    const performBudgetDeletion = async () => {
+        if (!budgetToDelete) return;
+        setBudgetDeleting(true);
         try {
-            await budgetAPI.remove(id);
+            await budgetAPI.remove(budgetToDelete.id);
             setBudgetEntries((previous) =>
-                previous.filter((budget) => budget.id !== id)
+                previous.filter((budget) => budget.id !== budgetToDelete.id)
             );
             toast.success("Budget removed");
         } catch (error) {
             console.error("Failed to remove budget", error);
             toast.error("Unable to delete budget");
+        } finally {
+            setBudgetDeleting(false);
+            setBudgetDeleteDialogOpen(false);
+            setBudgetToDelete(null);
         }
+    };
+
+    const requestPaymentDeletion = (payment: PaymentReminder) => {
+        setPaymentToDelete(payment);
+        setPaymentDeleteDialogOpen(true);
+    };
+
+    const performPaymentDeletion = async () => {
+        if (!paymentToDelete) return;
+        setPaymentDeleting(true);
+        try {
+            await paymentReminderAPI.remove(paymentToDelete.id);
+            setPayments((previous) =>
+                previous.filter((item) => item.id !== paymentToDelete.id)
+            );
+            toast.success("Payment reminder removed");
+        } catch (error) {
+            console.error("Failed to delete payment reminder", error);
+            toast.error("Unable to delete reminder");
+        } finally {
+            setPaymentDeleting(false);
+            setPaymentDeleteDialogOpen(false);
+            setPaymentToDelete(null);
+        }
+    };
+
+    const handleSchedulePaymentClick = () => {
+        setEditingPayment(null);
+        setPaymentDialogOpen(true);
+    };
+
+    const handleEditPayment = (payment: PaymentReminder) => {
+        setEditingPayment(payment);
+        setPaymentDialogOpen(true);
+    };
+
+    const closePaymentDialog = () => {
+        setPaymentDialogOpen(false);
+        setEditingPayment(null);
     };
 
     return (
@@ -346,7 +426,7 @@ export default function Budgets() {
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            onClick={() => setPaymentDialogOpen(true)}
+                                            onClick={handleSchedulePaymentClick}
                                             size="sm"
                                             className="gap-2"
                                         >
@@ -377,13 +457,15 @@ export default function Budgets() {
                                             budgets={computedBudgets}
                                             periodLabel={periodLabel}
                                             formatCurrency={formatCurrency}
-                                            onDeleteBudget={handleDeleteBudget}
+                                            onDeleteBudget={requestBudgetDeletion}
                                         />
                                         <BudgetInsightsPanel
                                             alerts={alerts}
                                             payments={scopedPayments}
                                             totalUpcoming={totalUpcomingPayments}
                                             formatCurrency={formatCurrency}
+                                            onEditPayment={handleEditPayment}
+                                            onDeletePayment={requestPaymentDeletion}
                                         />
                                     </div>
                                 </>
@@ -406,20 +488,95 @@ export default function Budgets() {
                     />
                 </DialogContent>
             </Dialog>
-            <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+            <Dialog
+                open={paymentDialogOpen}
+                onOpenChange={(open) => {
+                    setPaymentDialogOpen(open);
+                    if (!open) {
+                        setEditingPayment(null);
+                    }
+                }}
+            >
                 <DialogContent className="max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Schedule payment reminder</DialogTitle>
+                        <DialogTitle>
+                            {editingPayment ? "Edit payment reminder" : "Schedule payment reminder"}
+                        </DialogTitle>
                         <DialogDescription>
                             Keep tabs on upcoming charges and automatic debits.
                         </DialogDescription>
                     </DialogHeader>
                     <PaymentReminderForm
-                        onSubmit={handleAddPayment}
-                        onSuccess={() => setPaymentDialogOpen(false)}
+                        onSubmit={handleSavePayment}
+                        onSuccess={closePaymentDialog}
+                        initialReminder={editingPayment}
                     />
                 </DialogContent>
             </Dialog>
+            <AlertDialog
+                open={budgetDeleteDialogOpen}
+                onOpenChange={(open) => {
+                    setBudgetDeleteDialogOpen(open);
+                    if (!open) {
+                        setBudgetToDelete(null);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete budget?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently remove the{" "}
+                            <strong>{budgetToDelete?.label ?? "selected"}</strong> allocation.
+                            Transactions linked to this category remain untouched.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={budgetDeleting}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={performBudgetDeletion}
+                            disabled={budgetDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {budgetDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog
+                open={paymentDeleteDialogOpen}
+                onOpenChange={(open) => {
+                    setPaymentDeleteDialogOpen(open);
+                    if (!open) {
+                        setPaymentToDelete(null);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete payment reminder?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This removes the reminder for{" "}
+                            <strong>{paymentToDelete?.name ?? "this payment"}</strong>. You
+                            can recreate it at any time.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={paymentDeleting}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={performPaymentDeletion}
+                            disabled={paymentDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {paymentDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

@@ -55,21 +55,24 @@ export function DatePickerComponent({ onDateChange, defaultDate, required }: Dat
             </PopoverTrigger>
             <PopoverContent
                 align="start"
-                className="p-0"
-                style={{ width: "var(--radix-popover-trigger-width)" }}
+                className="min-w-[300px] p-0"
+                style={{ width: "var(--radix-popover-trigger-width)", minWidth: "300px" }}
             >
-                <div className="flex flex-col">
-                    <Calendar mode="single" selected={date} onSelect={handleDateChange} />
-                    <div className="border-t p-3">
-                        <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleTodayClick}
-                            type="button"
-                        >
-                            Today
-                        </Button>
-                    </div>
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateChange}
+                    className="w-full p-3"
+                />
+                <div className="border-t p-3">
+                    <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleTodayClick}
+                        type="button"
+                    >
+                        Today
+                    </Button>
                 </div>
             </PopoverContent>
         </Popover>

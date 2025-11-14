@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { categories } from "@/STATIC_DATA/STATIC_DATA";
 import type { PaymentReminderInput } from "@/components/Budgets/types";
+import type { PaymentReminder } from "@/types";
 import { toast } from "sonner";
 import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
 
 interface PaymentReminderFormProps {
-    onSubmit: (input: PaymentReminderInput) => Promise<boolean>;
+    onSubmit: (input: PaymentReminderInput, reminderId?: number) => Promise<boolean>;
     onSuccess?: () => void;
+    initialReminder?: PaymentReminder | null;
 }
 
 export function PaymentReminderForm({
     onSubmit,
     onSuccess,
+    initialReminder = null,
 }: PaymentReminderFormProps) {
     const fallbackCategory = categories[0] ?? "";
     const [name, setName] = useState("");
@@ -23,6 +26,22 @@ export function PaymentReminderForm({
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
     const [autoPay, setAutoPay] = useState(true);
     const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (initialReminder) {
+            setName(initialReminder.name);
+            setCategory(initialReminder.category);
+            setAmount(String(initialReminder.amount));
+            setDueDate(initialReminder.dueDate ? new Date(initialReminder.dueDate) : undefined);
+            setAutoPay(initialReminder.autoPay);
+        } else {
+            setName("");
+            setCategory(fallbackCategory);
+            setAmount("");
+            setDueDate(undefined);
+            setAutoPay(true);
+        }
+    }, [initialReminder, fallbackCategory]);
 
     const resetForm = () => {
         setName("");
@@ -47,16 +66,21 @@ export function PaymentReminderForm({
 
         setSaving(true);
         try {
-            const saved = await onSubmit({
-                name: name.trim(),
-                category,
-                amount: parsedAmount,
-                dueDate: dueDate.toISOString().split("T")[0],
-                autoPay,
-            });
+            const saved = await onSubmit(
+                {
+                    name: name.trim(),
+                    category,
+                    amount: parsedAmount,
+                    dueDate: dueDate.toISOString().split("T")[0],
+                    autoPay,
+                },
+                initialReminder?.id
+            );
 
             if (saved) {
-                resetForm();
+                if (!initialReminder) {
+                    resetForm();
+                }
                 onSuccess?.();
             }
         } finally {
@@ -97,8 +121,8 @@ export function PaymentReminderForm({
                     <Input
                         id="payment-amount"
                         type="number"
-                        min="0"
-                        step="100"
+                        step="0.01"
+                        min="0.01"
                         inputMode="decimal"
                         value={amount}
                         onChange={(event) => setAmount(event.target.value)}

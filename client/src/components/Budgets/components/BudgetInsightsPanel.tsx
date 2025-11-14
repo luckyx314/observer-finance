@@ -7,6 +7,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { IconPencil, IconTrash } from "@tabler/icons-react";
 import type { BudgetInsight } from "@/components/Budgets/types";
 import type { PaymentReminder } from "@/types";
 
@@ -15,6 +17,8 @@ interface BudgetInsightsPanelProps {
     payments: PaymentReminder[];
     totalUpcoming: number;
     formatCurrency: (value: number) => string;
+    onEditPayment?: (payment: PaymentReminder) => void;
+    onDeletePayment?: (payment: PaymentReminder) => void;
 }
 
 export function BudgetInsightsPanel({
@@ -22,6 +26,8 @@ export function BudgetInsightsPanel({
     payments,
     totalUpcoming,
     formatCurrency,
+    onEditPayment,
+    onDeletePayment,
 }: BudgetInsightsPanelProps) {
     return (
         <div className="space-y-4">
@@ -118,6 +124,32 @@ export function BudgetInsightsPanel({
                                     </>
                                 )}
                             </div>
+                            {(onEditPayment || onDeletePayment) && (
+                                <div className="flex gap-2 pt-2">
+                                    {onEditPayment && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="gap-1"
+                                            onClick={() => onEditPayment(payment)}
+                                        >
+                                            <IconPencil className="size-4" />
+                                            Edit
+                                        </Button>
+                                    )}
+                                    {onDeletePayment && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="gap-1 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+                                            onClick={() => onDeletePayment(payment)}
+                                        >
+                                            <IconTrash className="size-4" />
+                                            Delete
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     ))}
                 </CardContent>
