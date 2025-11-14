@@ -164,7 +164,7 @@ const AddTransactionDialog = ({
 
                             <div className="flex flex-col gap-3 flex-1">
                                 <Label htmlFor="date-picker-1">Date</Label>
-                                <DatePickerComponent onDateChange={handleDateChange} />
+                                <DatePickerComponent onDateChange={handleDateChange} defaultDate={date} />
                             </div>
                         </div>
 

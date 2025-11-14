@@ -34,6 +34,11 @@ export function DatePickerComponent({ onDateChange, defaultDate }: DatePickerCom
         }
     };
 
+    const handleTodayClick = () => {
+        const today = new Date();
+        handleDateChange(today);
+    };
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -47,7 +52,19 @@ export function DatePickerComponent({ onDateChange, defaultDate }: DatePickerCom
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
-                <Calendar mode="single" selected={date} onSelect={handleDateChange} />
+                <div className="flex flex-col">
+                    <Calendar mode="single" selected={date} onSelect={handleDateChange} />
+                    <div className="border-t p-3">
+                        <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={handleTodayClick}
+                            type="button"
+                        >
+                            Today
+                        </Button>
+                    </div>
+                </div>
             </PopoverContent>
         </Popover>
     );

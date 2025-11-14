@@ -78,19 +78,28 @@ export default function Account() {
     };
 
     return (
-        <SidebarProvider>
-            <AppSidebar />
+        <SidebarProvider
+            style={
+                {
+                    "--sidebar-width": "calc(var(--spacing) * 72)",
+                    "--header-height": "calc(var(--spacing) * 12)",
+                } as React.CSSProperties
+            }
+        >
+            <AppSidebar variant="inset" />
             <SidebarInset>
                 <SiteHeader headerTitle="Account Settings" />
-                <div className="flex flex-1 flex-col gap-4 overflow-auto p-4 lg:p-6">
-                    <div className="">
-                        <p className="text-sm text-muted-foreground mb-6">
-                            Manage your account details and preferences
-                        </p>
-                    </div>
-                    <div className="">
-                        {/* Personal Information */}
-                        <Card>
+                <div className="flex flex-1 flex-col">
+                    <div className="@container/main flex flex-1 flex-col gap-2">
+                        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                            <div className="px-4 lg:px-6">
+                                <p className="text-sm text-muted-foreground">
+                                    Manage your account details and preferences
+                                </p>
+                            </div>
+                            <div className="flex flex-col gap-6 px-4 lg:px-6">
+                                {/* Personal Information */}
+                                <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <IconUser className="size-5" />
@@ -172,10 +181,10 @@ export default function Account() {
                                     </div>
                                 </form>
                             </CardContent>
-                        </Card>
+                                </Card>
 
-                        {/* Password Section */}
-                        <Card className="mt-6">
+                                {/* Password Section */}
+                                <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <IconLock className="size-5" />
@@ -237,10 +246,10 @@ export default function Account() {
                                     </div>
                                 </form>
                             </CardContent>
-                        </Card>
+                                </Card>
 
-                        {/* Danger Zone */}
-                        <Card className="mt-6 border-destructive/50">
+                                {/* Danger Zone */}
+                                <Card className="border-destructive/50">
                             <CardHeader>
                                 <CardTitle className="text-destructive">
                                     Danger Zone
@@ -269,7 +278,9 @@ export default function Account() {
                                     </Button>
                                 </div>
                             </CardContent>
-                        </Card>
+                                </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </SidebarInset>
