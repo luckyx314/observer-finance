@@ -15,8 +15,8 @@ import { Label } from "@/components/ui/label";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import SelectComponent from "@/components/Select/SelectComponent";
 import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
-import { categories, transactionType } from "@/STATIC_DATA/STATIC_DATA";
-import { useState } from "react";
+import { categoryByType, transactionType, fieldLabelsByType } from "@/STATIC_DATA/STATIC_DATA";
+import { useState, useMemo } from "react";
 import { transactionAPI } from "@/services/api";
 import { TransactionType, TransactionStatus } from "@/types";
 import { toast } from "sonner";
@@ -44,11 +44,23 @@ const AddTransactionDialog = ({
     const handleTypeChange = (value: string) => {
         setTitle(value);
         setType(value as TransactionType);
+        // Reset category when type changes since categories are type-specific
+        setCategory("");
     };
 
     const handleCategoryChange = (value: string) => {
         setCategory(value);
     };
+
+    // Get categories based on selected transaction type
+    const currentCategories = useMemo(() => {
+        return categoryByType[type as keyof typeof categoryByType] || categoryByType.Expense;
+    }, [type]);
+
+    // Get dynamic field labels based on transaction type
+    const fieldLabels = useMemo(() => {
+        return fieldLabelsByType[type as keyof typeof fieldLabelsByType] || fieldLabelsByType.Expense;
+    }, [type]);
 
     const handleDateChange = (selectedDate: Date | undefined) => {
         if (selectedDate) {
@@ -136,15 +148,17 @@ const AddTransactionDialog = ({
                                 items={transactionType}
                                 label="Transaction Type"
                                 onChange={handleTypeChange}
+                                value={type}
                             />
                         </div>
                         <div className="flex flex-col md:flex-row gap-5 w-full">
                             <div className="flex flex-col gap-3 flex-1">
                                 <Label htmlFor="category-1">Category</Label>
                                 <SelectComponent
-                                    items={categories}
+                                    items={currentCategories}
                                     label="Category"
                                     onChange={handleCategoryChange}
+                                    value={category}
                                 />
                             </div>
 
@@ -155,11 +169,11 @@ const AddTransactionDialog = ({
                         </div>
 
                         <div className="grid gap-3">
-                            <Label htmlFor="merchant-1">Merchant</Label>
+                            <Label htmlFor="merchant-1">{fieldLabels.merchant}</Label>
                             <Input
                                 id="merchant-1"
                                 name="merchant"
-                                placeholder="ex. Jollibee"
+                                placeholder={fieldLabels.merchantPlaceholder}
                                 value={merchant}
                                 onChange={(e) => setMerchant(e.target.value)}
                                 disabled={loading}

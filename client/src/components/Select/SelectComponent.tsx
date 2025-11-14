@@ -12,15 +12,17 @@ type DropdownProps = {
     items: string[];
     label: string;
     onChange?: (value: string) => void;
+    value?: string;
 };
 
 export default function SelectCategory({
     items,
     label,
     onChange,
+    value,
 }: DropdownProps) {
     return (
-        <Select onValueChange={onChange}>
+        <Select onValueChange={onChange} value={value}>
             <SelectTrigger className="w-full">
                 <SelectValue
                     placeholder={`Select a ${label.toLocaleLowerCase()}`}

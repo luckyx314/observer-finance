@@ -4,6 +4,7 @@ import { SignupForm } from "./components/Authentication/SignupForm";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Income from "./components/Income/Income";
 import Investments from "./components/Investments/Investments";
+import Account from "./components/Account/Account";
 import { ThemeProvider } from "@/components/Theme/theme-provider";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -39,6 +40,14 @@ const App = () => {
                             element={
                                 <ProtectedRoute>
                                     <Investments />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/account"
+                            element={
+                                <ProtectedRoute>
+                                    <Account />
                                 </ProtectedRoute>
                             }
                         />

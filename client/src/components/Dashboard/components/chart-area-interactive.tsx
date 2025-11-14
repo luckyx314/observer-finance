@@ -35,11 +35,11 @@ export const description = "An interactive area chart";
 const chartConfig = {
     expenses: {
         label: "Expenses",
-        color: "var(--color-desktop)",
+        color: "hsl(285, 65%, 52%)",
     },
     income: {
         label: "Income",
-        color: "var(--color-mobile)",
+        color: "hsl(270, 70%, 62%)",
     },
 } satisfies ChartConfig;
 
@@ -168,13 +168,13 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             >
                                 <stop
                                     offset="5%"
-                                    stopColor="var(--color-desktop)"
-                                    stopOpacity={1.0}
+                                    stopColor="hsl(285, 65%, 52%)"
+                                    stopOpacity={0.6}
                                 />
                                 <stop
                                     offset="95%"
-                                    stopColor="var(--color-desktop)"
-                                    stopOpacity={0.1}
+                                    stopColor="hsl(285, 65%, 52%)"
+                                    stopOpacity={0.05}
                                 />
                             </linearGradient>
                             <linearGradient
@@ -186,13 +186,13 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             >
                                 <stop
                                     offset="5%"
-                                    stopColor="var(--color-mobile)"
-                                    stopOpacity={0.8}
+                                    stopColor="hsl(270, 70%, 62%)"
+                                    stopOpacity={0.5}
                                 />
                                 <stop
                                     offset="95%"
-                                    stopColor="var(--color-mobile)"
-                                    stopOpacity={0.1}
+                                    stopColor="hsl(270, 70%, 62%)"
+                                    stopOpacity={0.05}
                                 />
                             </linearGradient>
                         </defs>
@@ -231,14 +231,16 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             dataKey="income"
                             type="natural"
                             fill="url(#fillMobile)"
-                            stroke="var(--color-mobile)"
+                            stroke="hsl(270, 70%, 62%)"
+                            strokeWidth={2}
                             stackId="a"
                         />
                         <Area
                             dataKey="expenses"
                             type="natural"
                             fill="url(#expenses)"
-                            stroke="var(--color-desktop)"
+                            stroke="hsl(285, 65%, 52%)"
+                            strokeWidth={2}
                             stackId="a"
                         />
                     </AreaChart>

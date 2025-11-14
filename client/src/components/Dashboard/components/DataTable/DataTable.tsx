@@ -113,7 +113,11 @@ function DragHandle({ id }: { id: number }) {
     );
 }
 
-function createColumns(onDelete: (id: number) => void): ColumnDef<Transaction>[] {
+function createColumns(
+    onDelete: (id: number) => void,
+    onEdit: (id: number) => void,
+    onRefresh?: () => void
+): ColumnDef<Transaction>[] {
     return [
         {
             id: "drag",
@@ -151,8 +155,21 @@ function createColumns(onDelete: (id: number) => void): ColumnDef<Transaction>[]
         {
             accessorKey: "merchant",
             header: "Merchant",
-            cell: ({ row }) => {
-                return <TableCellViewer item={row.original} />;
+            cell: ({ row, table }) => {
+                const meta = table.options.meta as { editingId: number | null; setEditingId: (id: number | null) => void } | undefined;
+                const isEditing = meta?.editingId === row.original.id;
+                return (
+                    <TableCellViewer
+                        item={row.original}
+                        onUpdate={onRefresh}
+                        externalOpen={isEditing}
+                        onOpenChange={(open) => {
+                            if (meta) {
+                                meta.setEditingId(open ? row.original.id : null);
+                            }
+                        }}
+                    />
+                );
             },
             enableHiding: false,
         },
@@ -213,7 +230,7 @@ function createColumns(onDelete: (id: number) => void): ColumnDef<Transaction>[]
                     htmlFor={`${row.original.id}-target`}
                     className="text-sm font-medium"
                 >
-                    ${row.original.amount.toFixed(2)}
+                    ₱{row.original.amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Label>
             ),
         },
@@ -232,7 +249,10 @@ function createColumns(onDelete: (id: number) => void): ColumnDef<Transaction>[]
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-32">
-                        <DropdownMenuItem onClick={() => onDelete(row.original.id)}>
+                        <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onDelete(row.original.id)} className="text-destructive focus:text-destructive">
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -286,6 +306,7 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
     });
     const [deleteId, setDeleteId] = React.useState<number | null>(null);
     const [isDeleting, setIsDeleting] = React.useState(false);
+    const [editingId, setEditingId] = React.useState<number | null>(null);
 
     React.useEffect(() => {
         setData(initialData);
@@ -293,6 +314,10 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
 
     const handleDelete = async (id: number) => {
         setDeleteId(id);
+    };
+
+    const handleEdit = (id: number) => {
+        setEditingId(id);
     };
 
     const confirmDelete = async () => {
@@ -326,7 +351,7 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
         [data]
     );
 
-    const columns = React.useMemo(() => createColumns(handleDelete), []);
+    const columns = React.useMemo(() => createColumns(handleDelete, handleEdit, onRefresh), [onRefresh]);
 
     const table = useReactTable({
         data,
@@ -337,6 +362,10 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
             rowSelection,
             columnFilters,
             pagination,
+        },
+        meta: {
+            editingId,
+            setEditingId,
         },
         getRowId: (row) => row.id.toString(),
         enableRowSelection: true,
@@ -407,14 +436,10 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <IconLayoutColumns />
-                                <span className="hidden lg:inline">
-                                    Customize Columns
-                                </span>
-                                <span className="lg:hidden">Columns</span>
-                                <IconChevronDown />
+                                Columns
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuContent align="end" className="w-48">
                             {table
                                 .getAllColumns()
                                 .filter(
@@ -438,10 +463,6 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
                                 })}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button variant="outline" size="sm">
-                        <IconPlus />
-                        <span className="hidden lg:inline">Add Section</span>
-                    </Button>
                 </div>
             </div>
             <TabsContent

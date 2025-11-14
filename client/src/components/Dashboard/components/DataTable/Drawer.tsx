@@ -1,13 +1,5 @@
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-} from "@/components/ui/chart";
-import type { ChartConfig } from "@/components/ui/chart";
-
 import {
     Drawer,
     DrawerClose,
@@ -28,139 +20,224 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { categories } from "@/STATIC_DATA/STATIC_DATA";
-import type { Transaction } from "@/types";
-import { IconTrendingUp } from "@tabler/icons-react";
+import { categoryByType, transactionType, fieldLabelsByType } from "@/STATIC_DATA/STATIC_DATA";
+import type { Transaction, TransactionStatus } from "@/types";
+import { useState, useMemo, useEffect } from "react";
+import { transactionAPI } from "@/services/api";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
 
-const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
-];
-
-const chartConfig = {
-    desktop: {
-        label: "Desktop",
-        color: "var(--color-desktop)",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "var(--color-mobile)",
-    },
-} satisfies ChartConfig;
+interface TableCellViewerProps {
+    item: Transaction;
+    onUpdate?: () => void;
+    externalOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
 
 export default function TableCellViewer({
     item,
-}: {
-    item: Transaction;
-}) {
+    onUpdate,
+    externalOpen,
+    onOpenChange,
+}: TableCellViewerProps) {
     const isMobile = useIsMobile();
 
+    // Form state
+    const [selectedType, setSelectedType] = useState(item.type);
+    const [merchant, setMerchant] = useState(item.merchant);
+    const [category, setCategory] = useState(item.category);
+    const [status, setStatus] = useState(item.status);
+    const [amount, setAmount] = useState(item.amount.toString());
+    const [date, setDate] = useState<Date>(new Date(item.date));
+    const [loading, setLoading] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+
+    // Use external open state if provided, otherwise use internal
+    const open = externalOpen !== undefined ? externalOpen : internalOpen;
+    const setOpen = (value: boolean) => {
+        if (onOpenChange) {
+            onOpenChange(value);
+        } else {
+            setInternalOpen(value);
+        }
+    };
+
+    // Get categories based on selected transaction type
+    const currentCategories = useMemo(() => {
+        return categoryByType[selectedType as keyof typeof categoryByType] || categoryByType.Expense;
+    }, [selectedType]);
+
+    // Get dynamic field labels based on transaction type
+    const fieldLabels = useMemo(() => {
+        return fieldLabelsByType[selectedType as keyof typeof fieldLabelsByType] || fieldLabelsByType.Expense;
+    }, [selectedType]);
+
+    // Reset form when drawer opens or item changes
+    useEffect(() => {
+        if (open) {
+            setSelectedType(item.type);
+            setMerchant(item.merchant);
+            setCategory(item.category);
+            setStatus(item.status);
+            setAmount(item.amount.toString());
+            setDate(new Date(item.date));
+        }
+    }, [open, item]);
+
+    // Reset category when type changes if current category is not in new type's categories
+    const handleTypeChange = (newType: string) => {
+        setSelectedType(newType);
+        if (!currentCategories.includes(category)) {
+            setCategory("");
+        }
+    };
+
+    const handleDateChange = (selectedDate: Date | undefined) => {
+        if (selectedDate) {
+            setDate(selectedDate);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!merchant || !category || !amount || !selectedType || !date) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        const amountNum = parseFloat(amount);
+        if (isNaN(amountNum) || amountNum <= 0) {
+            toast.error("Please enter a valid amount");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            await transactionAPI.update(item.id, {
+                merchant,
+                category,
+                type: selectedType,
+                status,
+                amount: amountNum,
+                date: date.toISOString().split("T")[0],
+            });
+
+            toast.success("Transaction updated successfully!");
+            setOpen(false);
+            if (onUpdate) {
+                onUpdate();
+            }
+        } catch (error: any) {
+            console.error("Failed to update transaction:", error);
+            toast.error(
+                error.response?.data?.message ||
+                    "Failed to update transaction. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <Drawer direction={isMobile ? "bottom" : "right"}>
+        <Drawer direction={isMobile ? "bottom" : "right"} open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>
                 <Button
                     variant="link"
                     className="w-fit px-0 text-left text-foreground"
                 >
-                    {item.merchant}
+                    {merchant}
                 </Button>
             </DrawerTrigger>
 
             <DrawerContent>
                 <DrawerHeader className="gap-1">
-                    <DrawerTitle>{item.merchant}</DrawerTitle>
+                    <DrawerTitle>{merchant}</DrawerTitle>
                     <DrawerDescription>
-                        Showing total visitors for the last 6 months
+                        Edit transaction details
                     </DrawerDescription>
                 </DrawerHeader>
 
                 <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
-                    {!isMobile && (
-                        <>
-                            <ChartContainer config={chartConfig}>
-                                <AreaChart
-                                    data={chartData}
-                                    margin={{ left: 0, right: 10 }}
-                                >
-                                    <CartesianGrid vertical={false} />
-                                    <XAxis
-                                        dataKey="month"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickMargin={8}
-                                        tickFormatter={(value) =>
-                                            value.slice(0, 3)
-                                        }
-                                        hide
-                                    />
-                                    <ChartTooltip
-                                        cursor={false}
-                                        content={
-                                            <ChartTooltipContent indicator="dot" />
-                                        }
-                                    />
-                                    <Area
-                                        dataKey="mobile"
-                                        type="natural"
-                                        fill="var(--color-mobile)"
-                                        fillOpacity={0.6}
-                                        stroke="var(--color-mobile)"
-                                        stackId="a"
-                                    />
-                                    <Area
-                                        dataKey="desktop"
-                                        type="natural"
-                                        fill="var(--color-desktop)"
-                                        fillOpacity={0.4}
-                                        stroke="var(--color-desktop)"
-                                        stackId="a"
-                                    />
-                                </AreaChart>
-                            </ChartContainer>
+                    <div className="grid gap-2 rounded-lg bg-muted p-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Transaction ID:</span>
+                            <span className="font-medium">#{item.id}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Created:</span>
+                            <span className="font-medium">
+                                {format(new Date(item.createdAt), "PPp")}
+                            </span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Last Updated:</span>
+                            <span className="font-medium">
+                                {format(new Date(item.updatedAt), "PPp")}
+                            </span>
+                        </div>
+                    </div>
 
-                            <Separator />
+                    <Separator />
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center gap-2 font-medium leading-none">
-                                    Trending up by 5.2% this month
-                                    <IconTrendingUp className="size-4" />
-                                </div>
-                                <p className="text-muted-foreground">
-                                    Showing total visitors for the last 6
-                                    months. This is just some random text to
-                                    test the layout. It spans multiple lines and
-                                    should wrap around.
-                                </p>
-                            </div>
-
-                            <Separator />
-                        </>
-                    )}
-
-                    <form className="flex flex-col gap-4">
+                    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-3">
-                            <Label htmlFor="mercant">Merchant</Label>
-                            <Input id="mercant" defaultValue={item.merchant} />
+                            <Label htmlFor="transaction-type">Transaction Type</Label>
+                            <Select
+                                value={selectedType}
+                                onValueChange={handleTypeChange}
+                                disabled={loading}
+                            >
+                                <SelectTrigger id="transaction-type" className="w-full">
+                                    <SelectValue placeholder="Select a type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {transactionType.map((type) => (
+                                        <SelectItem
+                                            key={type}
+                                            value={type}
+                                        >
+                                            {type}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <Label htmlFor="merchant">{fieldLabels.merchant}</Label>
+                            <Input
+                                id="merchant"
+                                value={merchant}
+                                onChange={(e) => setMerchant(e.target.value)}
+                                placeholder={fieldLabels.merchantPlaceholder}
+                                disabled={loading}
+                                required
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="type">Category</Label>
-                                <Select defaultValue={item.category}>
-                                    <SelectTrigger id="type" className="w-full">
-                                        <SelectValue placeholder="Select a type" />
+                                <Label htmlFor="category">Category</Label>
+                                <Select
+                                    value={category}
+                                    onValueChange={setCategory}
+                                    disabled={loading}
+                                >
+                                    <SelectTrigger id="category" className="w-full">
+                                        <SelectValue placeholder="Select a category" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {categories.map((category) => (
+                                        {currentCategories.map((cat) => (
                                             <SelectItem
-                                                key={category}
-                                                value={category}
+                                                key={cat}
+                                                value={cat}
                                             >
-                                                {category}
+                                                {cat}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -169,7 +246,11 @@ export default function TableCellViewer({
 
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="status">Status</Label>
-                                <Select defaultValue={item.status}>
+                                <Select
+                                    value={status}
+                                    onValueChange={(value) => setStatus(value as TransactionStatus)}
+                                    disabled={loading}
+                                >
                                     <SelectTrigger
                                         id="status"
                                         className="w-full"
@@ -180,11 +261,14 @@ export default function TableCellViewer({
                                         <SelectItem value="Done">
                                             Done
                                         </SelectItem>
-                                        <SelectItem value="In Progress">
-                                            In Progress
+                                        <SelectItem value="In Process">
+                                            In Process
                                         </SelectItem>
-                                        <SelectItem value="Not Started">
-                                            Not Started
+                                        <SelectItem value="Pending">
+                                            Pending
+                                        </SelectItem>
+                                        <SelectItem value="Cancelled">
+                                            Cancelled
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -192,38 +276,40 @@ export default function TableCellViewer({
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            <div className="flex flex-col gap-3">
-                                <Label htmlFor="amount">Amount</Label>
-                                <Input id="amount" type="number" defaultValue={item.amount} />
-                            </div>
+                            <Label htmlFor="amount">Amount</Label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                step="0.01"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                disabled={loading}
+                                required
+                            />
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            <Label htmlFor="reviewer">Reviewer</Label>
-                            <Select>
-                                <SelectTrigger id="reviewer" className="w-full">
-                                    <SelectValue placeholder="Select a reviewer" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Eddie Lake">
-                                        Eddie Lake
-                                    </SelectItem>
-                                    <SelectItem value="Jamik Tashpulatov">
-                                        Jamik Tashpulatov
-                                    </SelectItem>
-                                    <SelectItem value="Emily Whalen">
-                                        Emily Whalen
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <Label htmlFor="date">Date</Label>
+                            <DatePickerComponent
+                                onDateChange={handleDateChange}
+                                defaultDate={date}
+                            />
                         </div>
                     </form>
                 </div>
 
                 <DrawerFooter>
-                    <Button>Update</Button>
+                    <Button
+                        type="submit"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? "Updating..." : "Update"}
+                    </Button>
                     <DrawerClose asChild>
-                        <Button variant="outline">Done</Button>
+                        <Button variant="outline" disabled={loading}>
+                            Cancel
+                        </Button>
                     </DrawerClose>
                 </DrawerFooter>
             </DrawerContent>
