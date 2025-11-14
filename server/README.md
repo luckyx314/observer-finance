@@ -6,6 +6,7 @@ NestJS-based REST API for the Observer Finance application with SQLite database 
 
 - JWT-based authentication with bcrypt password hashing
 - Email verification via OTP codes (sent immediately after login) with resend support
+- Wallet CRUD endpoints for manual balance tracking
 - Password reset links delivered via email
 - User registration and login
 - Transaction CRUD operations
@@ -254,6 +255,47 @@ GET /api/transactions/stats/total?type=Expense
 Authorization: Bearer <access_token>
 ```
 
+### Wallet Endpoints
+
+All wallet endpoints require JWT authentication.
+
+#### Create Wallet
+```http
+POST /api/wallets
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "name": "Main Checking",
+  "balance": 12500,
+  "currency": "PHP"
+}
+```
+
+#### List Wallets
+```http
+GET /api/wallets
+Authorization: Bearer <access_token>
+```
+
+#### Update Wallet
+```http
+PATCH /api/wallets/:id
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "name": "Emergency Fund",
+  "balance": 20000
+}
+```
+
+#### Delete Wallet
+```http
+DELETE /api/wallets/:id
+Authorization: Bearer <access_token>
+```
+
 ## Database Schema
 
 ### User Entity
@@ -279,6 +321,15 @@ Authorization: Bearer <access_token>
 - `amount` - Transaction amount (decimal)
 - `date` - Transaction date
 - `description` - Optional description
+- `userId` - Foreign key to User
+- `createdAt` - Timestamp
+- `updatedAt` - Timestamp
+
+### Wallet Entity
+- `id` - Primary key (auto-increment)
+- `name` - Wallet label
+- `balance` - Current balance (decimal)
+- `currency` - ISO currency code (default PHP)
 - `userId` - Foreign key to User
 - `createdAt` - Timestamp
 - `updatedAt` - Timestamp

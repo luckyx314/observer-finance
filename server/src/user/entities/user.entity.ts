@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Transaction } from '../../transaction/entities/transaction.entity';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 
 @Entity('users')
 export class User {
@@ -54,4 +55,7 @@ export class User {
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  wallets: Wallet[];
 }

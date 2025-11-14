@@ -7,6 +7,7 @@ import type {
     UpdateTransactionDto,
     User,
     ApiMessageResponse,
+    Wallet,
 } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3100/api";
@@ -171,6 +172,24 @@ export const transactionAPI = {
             `/transactions/stats/total?type=${type}`
         );
         return response.data;
+    },
+};
+
+export const walletAPI = {
+    getAll: async (): Promise<Wallet[]> => {
+        const response = await api.get<Wallet[]>("/wallets");
+        return response.data;
+    },
+    create: async (wallet: { name: string; balance: number; currency?: string }): Promise<Wallet> => {
+        const response = await api.post<Wallet>("/wallets", wallet);
+        return response.data;
+    },
+    update: async (id: number, wallet: Partial<Wallet>): Promise<Wallet> => {
+        const response = await api.patch<Wallet>(`/wallets/${id}`, wallet);
+        return response.data;
+    },
+    remove: async (id: number): Promise<void> => {
+        await api.delete(`/wallets/${id}`);
     },
 };
 

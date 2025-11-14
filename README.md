@@ -95,6 +95,7 @@ Application will run at `http://localhost:5174`
 - ✅ User authentication (register/login)
 - ✅ Email verification via 6-digit OTPs (sent post-login)
 - ✅ Password reset flow with secure reset links
+- ✅ Wallet tracking with per-account balances
 - ✅ Transaction management (CRUD operations)
 - ✅ Transaction filtering by type and category
 - ✅ Dashboard with data visualization

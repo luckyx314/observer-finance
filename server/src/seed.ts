@@ -3,12 +3,14 @@ import { AppModule } from './app.module';
 import { UserService } from './user/user.service';
 import { TransactionService } from './transaction/transaction.service';
 import { TransactionType, TransactionStatus } from './transaction/entities/transaction.entity';
+import { WalletService } from './wallet/wallet.service';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
   const app = await NestFactory.create(AppModule);
   const userService = app.get(UserService);
   const transactionService = app.get(TransactionService);
+  const walletService = app.get(WalletService);
 
   console.log('🌱 Seeding database...');
 
@@ -23,6 +25,18 @@ async function seed() {
   });
 
   console.log('✅ Created demo user:', user.email);
+
+  // Create sample wallets
+  const wallets = [
+    { name: 'Main Checking', balance: 12500, currency: 'PHP' },
+    { name: 'Savings Vault', balance: 85000, currency: 'PHP' },
+  ];
+
+  for (const wallet of wallets) {
+    await walletService.create(wallet, user.id);
+  }
+
+  console.log('✅ Created', wallets.length, 'sample wallets');
 
   // Create sample transactions
   const transactions = [

@@ -1,7 +1,6 @@
 import * as React from "react";
 import {
     IconDashboard,
-    IconInnerShadowTop,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/Dashboard/components/nav-main";
@@ -15,6 +14,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import finxLogo from "@/assets/phoenix.png";
 
 const data = {
     user: {
@@ -46,11 +46,17 @@ export function AppSidebar({ onTransactionCreated, ...props }: AppSidebarProps) 
                             asChild
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <a href="#">
-                                <IconInnerShadowTop className="!size-5" />
-                                <span className="text-base font-semibold">
+                            <a href="/dashboard">
+                                <div className="flex items-center gap-2">
+                                    <img
+                                        src={finxLogo}
+                                        alt="Finx icon"
+                                        className="size-8 shrink-0"
+                                    />
+                                    <span className="text-base font-semibold">
                                     Finx.
                                 </span>
+                                </div>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

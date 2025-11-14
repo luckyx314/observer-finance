@@ -142,6 +142,24 @@ export const userAPI = {
   },
 };
 
+export const walletAPI = {
+  getAll: async () => {
+    const response = await api.get('/wallets');
+    return response.data;
+  },
+  create: async (payload: { name: string; balance: number; currency?: string }) => {
+    const response = await api.post('/wallets', payload);
+    return response.data;
+  },
+  update: async (id: number, payload: Partial<{ name: string; balance: number; currency: string }>) => {
+    const response = await api.patch(`/wallets/${id}`, payload);
+    return response.data;
+  },
+  remove: async (id: number) => {
+    await api.delete(`/wallets/${id}`);
+  },
+};
+
 export default api;
 ```
 
@@ -373,6 +391,13 @@ export const useAuth = () => {
 2. The backend generates a signed token, stores a hashed version, and emails a link built from `APP_URL` (defaults to `http://localhost:5174`). In development, the email content is logged if SMTP isn’t configured.
 3. Your reset form should read the `token` query param and submit it with the new password to `POST /api/auth/reset-password`.
 4. Tokens expire after 30 minutes; display the API’s error message and prompt the user to restart the flow when that happens.
+
+## Wallet Management
+
+1. Use the `walletAPI` helper above to power the dashboard wallet panel. Fetch wallets on mount to populate existing accounts.
+2. When creating a wallet, POST `{ name, balance, currency }` to `/api/wallets`. The response includes the stored wallet with an `id` you can append to local state.
+3. Support deletes with `DELETE /api/wallets/:id`. Optionally, expose updates using `PATCH /api/wallets/:id`.
+4. Persisted wallets belong to the authenticated user, so logging in with the demo account will show the seeded examples (Main Checking and Savings Vault).
 
 ## Testing the Integration
 

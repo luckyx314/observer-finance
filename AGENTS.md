@@ -19,6 +19,7 @@ cd server && npm run lint                      # ESLint across src/apps/libs/tes
 - All passwords are hashed with bcrypt on the server; never store or log raw passwords.
 - Registration immediately authenticates the user; OTP emails are dispatched right after login so they can verify later via `/verify-email` or POST `/auth/verify-email`. Use `/auth/resend-verification` if the 15-minute window lapses.
 - Forgot-password UX lives at `/forgot-password` and `/reset-password`; the backend sends 30-minute reset links via `APP_URL/reset-password?token=...`.
+- Wallets are persisted via the `/wallets` API. When updating the dashboard wallet panel, call the API instead of local storage and scope all requests to the authenticated user.
 - Configure `APP_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, and `MAIL_FROM` in `server/.env` so verification and reset emails can be delivered (otherwise they are logged to the console for local development).
 
 ## Coding Style & Naming Conventions

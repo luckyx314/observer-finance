@@ -3,6 +3,7 @@ import { ChartAreaInteractive } from "@/components/Dashboard/components/chart-ar
 import { ChartPieCategory } from "@/components/Dashboard/components/chart-pie-category";
 import { DataTable } from "@/components/Dashboard/components/DataTable/DataTable";
 import { SectionCards } from "@/components/Dashboard/components/section-cards";
+import { WalletManager } from "@/components/Dashboard/components/wallet-manager";
 import { SiteHeader } from "@/components/Dashboard/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
@@ -55,6 +56,9 @@ export default function Dashboard() {
                     <div className="@container/main flex flex-1 flex-col gap-2">
                         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                             <SectionCards transactions={transactions} />
+                            <div className="px-4 lg:px-6">
+                                <WalletManager />
+                            </div>
                             <div className="grid gap-4 px-4 md:grid-cols-2 lg:px-6">
                                 <ChartPieCategory transactions={transactions} type="Expense" />
                                 <ChartPieCategory transactions={transactions} type="Income" />

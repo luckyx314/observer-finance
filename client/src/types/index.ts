@@ -60,6 +60,15 @@ export interface CreateTransactionDto {
   description?: string;
 }
 
+export interface Wallet {
+  id: number;
+  name: string;
+  balance: number;
+  currency: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface UpdateTransactionDto {
   merchant?: string;
   category?: string;
