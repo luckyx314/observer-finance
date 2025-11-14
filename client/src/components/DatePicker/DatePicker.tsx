@@ -15,36 +15,38 @@ import {
 interface DatePickerComponentProps {
     onDateChange?: (date: Date | undefined) => void;
     defaultDate?: Date;
+    required?: boolean;
 }
 
-export function DatePickerComponent({ onDateChange, defaultDate }: DatePickerComponentProps = {}) {
+export function DatePickerComponent({ onDateChange, defaultDate, required }: DatePickerComponentProps = {}) {
     const [date, setDate] = React.useState<Date | undefined>(defaultDate);
+    const [open, setOpen] = React.useState(false);
 
-    // Update date when defaultDate changes
     React.useEffect(() => {
-        if (defaultDate) {
-            setDate(defaultDate);
-        }
+        setDate(defaultDate);
     }, [defaultDate]);
 
     const handleDateChange = (newDate: Date | undefined) => {
         setDate(newDate);
-        if (onDateChange) {
-            onDateChange(newDate);
+        onDateChange?.(newDate);
+        if (newDate) {
+            setOpen(false);
         }
     };
 
     const handleTodayClick = () => {
         const today = new Date();
         handleDateChange(today);
+        setOpen(false);
     };
 
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
                     data-empty={!date}
+                    aria-required={required}
                     className="data-[empty=true]:text-muted-foreground"
                 >
                     <CalendarIcon />

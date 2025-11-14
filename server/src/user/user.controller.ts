@@ -5,6 +5,7 @@ import {
   UseGuards,
   Request,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -22,5 +23,11 @@ export class UserController {
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findById(id);
+  }
+
+  @Delete('me')
+  async removeSelf(@Request() req) {
+    await this.userService.delete(req.user.userId);
+    return { message: 'Account deleted successfully' };
   }
 }

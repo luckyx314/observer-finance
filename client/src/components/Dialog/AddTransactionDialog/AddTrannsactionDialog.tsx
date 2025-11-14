@@ -37,7 +37,7 @@ const AddTransactionDialog = ({
     const [category, setCategory] = useState("");
     const [merchant, setMerchant] = useState("");
     const [amount, setAmount] = useState("");
-    const [date, setDate] = useState<Date>(new Date());
+    const [date, setDate] = useState<Date | undefined>(undefined);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -63,9 +63,7 @@ const AddTransactionDialog = ({
     }, [type]);
 
     const handleDateChange = (selectedDate: Date | undefined) => {
-        if (selectedDate) {
-            setDate(selectedDate);
-        }
+        setDate(selectedDate);
     };
 
     const resetForm = () => {
@@ -74,7 +72,7 @@ const AddTransactionDialog = ({
         setCategory("");
         setMerchant("");
         setAmount("");
-        setDate(new Date());
+        setDate(undefined);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +80,10 @@ const AddTransactionDialog = ({
 
         if (!merchant || !category || !amount || !type) {
             toast.error("Please fill in all required fields");
+            return;
+        }
+        if (!date) {
+            toast.error("Please select a date");
             return;
         }
 
@@ -164,7 +166,11 @@ const AddTransactionDialog = ({
 
                             <div className="flex flex-col gap-3 flex-1">
                                 <Label htmlFor="date-picker-1">Date</Label>
-                                <DatePickerComponent onDateChange={handleDateChange} defaultDate={date} />
+                                <DatePickerComponent
+                                    onDateChange={handleDateChange}
+                                    defaultDate={date}
+                                    required
+                                />
                             </div>
                         </div>
 

@@ -115,6 +115,10 @@ export const userAPI = {
         const response = await api.get<User>(`/users/${id}`);
         return response.data;
     },
+
+    deleteAccount: async (): Promise<void> => {
+        await api.delete("/users/me");
+    },
 };
 
 export const transactionAPI = {

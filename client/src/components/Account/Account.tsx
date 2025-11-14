@@ -16,10 +16,12 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Dashboard/components/app-sidebar";
 import { SiteHeader } from "@/components/Dashboard/components/site-header";
 import { IconUser, IconMail, IconLock } from "@tabler/icons-react";
+import { userAPI } from "@/services/api";
 
 export default function Account() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [user, setUser] = useState({
         email: "",
         firstName: "",
@@ -64,9 +66,11 @@ export default function Account() {
             }
 
             toast.success("Account details updated successfully!");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to update account:", error);
-            toast.error("Failed to update account details");
+            const message =
+                error instanceof Error ? error.message : "Failed to update account details";
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -75,6 +79,35 @@ export default function Account() {
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         toast.info("Password change functionality coming soon!");
+    };
+
+    const handleDeleteAccount = async () => {
+        if (deleteLoading) return;
+        const confirmed = window.confirm(
+            "Deleting your account is permanent and cannot be undone. Continue?"
+        );
+        if (!confirmed) {
+            return;
+        }
+        setDeleteLoading(true);
+        try {
+            await userAPI.deleteAccount();
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user");
+            toast.success("Account deleted. We're sorry to see you go.");
+            navigate("/signup");
+        } catch (error: unknown) {
+            console.error("Failed to delete account:", error);
+            const fallback = "Failed to delete account. Please try again.";
+            if (error && typeof error === "object" && "response" in error) {
+                const apiError = error as { response?: { data?: { message?: string } } };
+                toast.error(apiError.response?.data?.message || fallback);
+            } else {
+                toast.error(fallback);
+            }
+        } finally {
+            setDeleteLoading(false);
+        }
     };
 
     return (
@@ -268,13 +301,10 @@ export default function Account() {
                                     </div>
                                     <Button
                                         variant="destructive"
-                                        onClick={() =>
-                                            toast.error(
-                                                "Account deletion is not available yet"
-                                            )
-                                        }
+                                        onClick={handleDeleteAccount}
+                                        disabled={deleteLoading}
                                     >
-                                        Delete Account
+                                        {deleteLoading ? "Deleting..." : "Delete Account"}
                                     </Button>
                                 </div>
                             </CardContent>

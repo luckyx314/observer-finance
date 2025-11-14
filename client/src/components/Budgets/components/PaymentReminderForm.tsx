@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { categories } from "@/STATIC_DATA/STATIC_DATA";
 import type { PaymentReminderInput } from "@/components/Budgets/types";
+import { toast } from "sonner";
 
 interface PaymentReminderFormProps {
     onSubmit: (input: PaymentReminderInput) => Promise<boolean>;
@@ -20,9 +21,7 @@ export function PaymentReminderForm({
     const [name, setName] = useState("");
     const [category, setCategory] = useState(fallbackCategory);
     const [amount, setAmount] = useState("");
-    const [dueDate, setDueDate] = useState(() =>
-        format(new Date(), "yyyy-MM-dd")
-    );
+    const [dueDate, setDueDate] = useState("");
     const [autoPay, setAutoPay] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -35,7 +34,7 @@ export function PaymentReminderForm({
         setName("");
         setCategory(fallbackCategory);
         setAmount("");
-        setDueDate(format(new Date(), "yyyy-MM-dd"));
+        setDueDate("");
         setAutoPay(true);
     };
 
@@ -44,6 +43,11 @@ export function PaymentReminderForm({
 
         const parsedAmount = Number(amount);
         if (!name.trim() || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+            toast.error("Please provide a valid name and amount.");
+            return;
+        }
+        if (!dueDate) {
+            toast.error("Please choose a due date.");
             return;
         }
 
@@ -115,6 +119,7 @@ export function PaymentReminderForm({
                         value={dueDate}
                         min={minDate}
                         onChange={(event) => setDueDate(event.target.value)}
+                        required
                     />
                 </div>
             </div>
