@@ -27,36 +27,27 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { Transaction } from "@/types";
+import { format, subDays } from "date-fns";
 
 export const description = "An interactive area chart";
 
-const chartData = [
-    { date: "2024-04-01", expenses: 222, income: 150 },
-    { date: "2024-04-02", expenses: 97, income: 180 },
-    { date: "2024-04-03", expenses: 167, income: 120 },
-    { date: "2024-04-04", expenses: 242, income: 260 },
-    { date: "2024-04-05", expenses: 373, income: 290 },
-    { date: "2024-04-06", expenses: 301, income: 340 },
-    { date: "2024-04-07", expenses: 245, income: 180 },
-    { date: "2024-04-08", expenses: 409, income: 320 },
-    { date: "2024-04-09", expenses: 59, income: 110 },
-];
-
 const chartConfig = {
-    visitors: {
-        label: "Visitors",
-    },
     expenses: {
-        label: "expenses",
-        color: "var(--primary)",
+        label: "Expenses",
+        color: "var(--color-desktop)",
     },
     income: {
-        label: "Mobile",
-        color: "var(--primary)",
+        label: "Income",
+        color: "var(--color-mobile)",
     },
 } satisfies ChartConfig;
 
-export function ChartAreaInteractive() {
+interface ChartAreaInteractiveProps {
+    transactions: Transaction[];
+}
+
+export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps) {
     const isMobile = useIsMobile();
     const [timeRange, setTimeRange] = React.useState("90d");
 
@@ -66,19 +57,50 @@ export function ChartAreaInteractive() {
         }
     }, [isMobile]);
 
-    const filteredData = chartData.filter((item) => {
-        const date = new Date(item.date);
-        const referenceDate = new Date("2024-06-30");
+    const chartData = React.useMemo(() => {
+        // Group transactions by date
+        const dataByDate = new Map<string, { expenses: number; income: number }>();
+
+        transactions.forEach((transaction) => {
+            const dateKey = format(new Date(transaction.date), "yyyy-MM-dd");
+            const existing = dataByDate.get(dateKey) || { expenses: 0, income: 0 };
+
+            if (transaction.type === "Expense") {
+                existing.expenses += transaction.amount;
+            } else if (transaction.type === "Income") {
+                existing.income += transaction.amount;
+            }
+
+            dataByDate.set(dateKey, existing);
+        });
+
+        // Convert to array and sort by date
+        return Array.from(dataByDate.entries())
+            .map(([date, values]) => ({
+                date,
+                expenses: values.expenses,
+                income: values.income,
+            }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+    }, [transactions]);
+
+    const filteredData = React.useMemo(() => {
+        const today = new Date();
         let daysToSubtract = 90;
+
         if (timeRange === "30d") {
             daysToSubtract = 30;
         } else if (timeRange === "7d") {
             daysToSubtract = 7;
         }
-        const startDate = new Date(referenceDate);
-        startDate.setDate(startDate.getDate() - daysToSubtract);
-        return date >= startDate;
-    });
+
+        const startDate = subDays(today, daysToSubtract);
+
+        return chartData.filter((item) => {
+            const itemDate = new Date(item.date);
+            return itemDate >= startDate && itemDate <= today;
+        });
+    }, [chartData, timeRange]);
 
     return (
         <Card className="@container/card">

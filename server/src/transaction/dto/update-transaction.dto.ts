@@ -1,25 +1,30 @@
 import { IsString, IsNumber, IsEnum, IsOptional, IsDateString } from 'class-validator';
 import { TransactionType, TransactionStatus } from '../entities/transaction.entity';
 
-export class CreateTransactionDto {
+export class UpdateTransactionDto {
   @IsString()
-  merchant: string;
+  @IsOptional()
+  merchant?: string;
 
   @IsString()
-  category: string;
+  @IsOptional()
+  category?: string;
 
   @IsEnum(TransactionType)
-  type: TransactionType;
+  @IsOptional()
+  type?: TransactionType;
 
   @IsEnum(TransactionStatus)
   @IsOptional()
   status?: TransactionStatus;
 
   @IsNumber()
-  amount: number;
+  @IsOptional()
+  amount?: number;
 
   @IsDateString()
-  date: string;
+  @IsOptional()
+  date?: string;
 
   @IsString()
   @IsOptional()

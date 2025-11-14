@@ -9,12 +9,60 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { authAPI } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 export function SignupForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!email || !password) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        if (password.length < 6) {
+            toast.error("Password must be at least 6 characters");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await authAPI.register(
+                email,
+                password,
+                firstName || undefined,
+                lastName || undefined
+            );
+            login(response.access_token, response.user);
+            toast.success("Account created successfully!");
+            navigate("/dashboard");
+        } catch (error: any) {
+            const errorMessage =
+                error.response?.data?.message ||
+                "Registration failed. Please try again.";
+            toast.error(errorMessage);
+            console.error("Registration error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
             <div className="w-full max-w-sm">
@@ -26,11 +74,11 @@ export function SignupForm({
                         <CardHeader>
                             <CardTitle>Create your account</CardTitle>
                             <CardDescription>
-                                Enter your email below to create your account
+                                Enter your details below to create your account
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="flex flex-col gap-6">
                                     <div className="grid gap-3">
                                         <Label htmlFor="email">Email</Label>
@@ -38,28 +86,67 @@ export function SignupForm({
                                             id="email"
                                             type="email"
                                             placeholder="m@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            disabled={loading}
+                                            required
                                         />
                                     </div>
                                     <div className="grid gap-3">
-                                        <div className="flex items-center">
-                                            <Label htmlFor="password">
-                                                Password
-                                            </Label>
-                                        </div>
-                                        <Input id="password" type="password" />
+                                        <Label htmlFor="firstName">
+                                            First Name (Optional)
+                                        </Label>
+                                        <Input
+                                            id="firstName"
+                                            type="text"
+                                            placeholder="John"
+                                            value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)}
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                    <div className="grid gap-3">
+                                        <Label htmlFor="lastName">
+                                            Last Name (Optional)
+                                        </Label>
+                                        <Input
+                                            id="lastName"
+                                            type="text"
+                                            placeholder="Doe"
+                                            value={lastName}
+                                            onChange={(e) => setLastName(e.target.value)}
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                    <div className="grid gap-3">
+                                        <Label htmlFor="password">
+                                            Password (min. 6 characters)
+                                        </Label>
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            disabled={loading}
+                                            required
+                                            minLength={6}
+                                        />
                                     </div>
                                     <div className="flex flex-col gap-3">
                                         <Button
                                             type="submit"
                                             className="w-full"
+                                            disabled={loading}
                                         >
-                                            Sign-up
+                                            {loading ? "Creating account..." : "Sign-up"}
                                         </Button>
                                         <Button
                                             variant="outline"
                                             className="w-full"
+                                            type="button"
+                                            disabled
                                         >
-                                            Login with Google
+                                            Sign up with Google
                                         </Button>
                                     </div>
                                 </div>

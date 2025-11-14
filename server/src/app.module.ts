@@ -1,31 +1,23 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { User } from './user/entities/user.entity';
+import { Transaction } from './transaction/entities/transaction.entity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT ?? '3306', 10),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,
-      synchronize: true,
+      type: 'sqlite',
+      database: 'observer-finance.db',
+      entities: [User, Transaction],
+      synchronize: true, // Set to false in production
+      logging: false,
     }),
+    AuthModule,
     UserModule,
     TransactionModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

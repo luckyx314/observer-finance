@@ -49,7 +49,6 @@ import type {
     VisibilityState,
 } from "@tanstack/react-table";
 
-import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -59,7 +58,6 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
@@ -80,15 +78,20 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TableCellViewer from "./Drawer";
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const schema = z.object({
-    id: z.number(),
-    merchant: z.string(),
-    category: z.string(),
-    status: z.string(),
-    amount: z.string(),
-});
+import type { Transaction } from "@/types";
+import { format } from "date-fns";
+import { transactionAPI } from "@/services/api";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
@@ -110,117 +113,136 @@ function DragHandle({ id }: { id: number }) {
     );
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-    {
-        id: "drag",
-        header: () => null,
-        cell: ({ row }) => <DragHandle id={row.original.id} />,
-    },
-    {
-        id: "select",
-        header: ({ table }) => (
-            <div className="flexems-center justify-center">
-                <Checkbox
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && "indeterminate")
-                    }
-                    onCheckedChange={(value) =>
-                        table.toggleAllPageRowsSelected(!!value)
-                    }
-                    aria-label="Select all"
-                />
-            </div>
-        ),
-        cell: ({ row }) => (
-            <div className="flex items-center justify-center">
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label="Select row"
-                />
-            </div>
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "merchant",
-        header: "Merchant",
-        cell: ({ row }) => {
-            return <TableCellViewer item={row.original} />;
+function createColumns(onDelete: (id: number) => void): ColumnDef<Transaction>[] {
+    return [
+        {
+            id: "drag",
+            header: () => null,
+            cell: ({ row }) => <DragHandle id={row.original.id} />,
         },
-        enableHiding: false,
-    },
-    {
-        accessorKey: "category",
-        header: "Category",
-        cell: ({ row }) => (
-            <div className="w-32">
+        {
+            id: "select",
+            header: ({ table }) => (
+                <div className="flex items-center justify-center">
+                    <Checkbox
+                        checked={
+                            table.getIsAllPageRowsSelected() ||
+                            (table.getIsSomePageRowsSelected() && "indeterminate")
+                        }
+                        onCheckedChange={(value) =>
+                            table.toggleAllPageRowsSelected(!!value)
+                        }
+                        aria-label="Select all"
+                    />
+                </div>
+            ),
+            cell: ({ row }) => (
+                <div className="flex items-center justify-center">
+                    <Checkbox
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(value) => row.toggleSelected(!!value)}
+                        aria-label="Select row"
+                    />
+                </div>
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
+            accessorKey: "merchant",
+            header: "Merchant",
+            cell: ({ row }) => {
+                return <TableCellViewer item={row.original} />;
+            },
+            enableHiding: false,
+        },
+        {
+            accessorKey: "type",
+            header: "Type",
+            cell: ({ row }) => (
                 <Badge
                     variant="outline"
                     className="text-muted-foreground px-1.5"
                 >
-                    {row.original.category}
+                    {row.original.type}
                 </Badge>
-            </div>
-        ),
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge variant="outline" className="text-muted-foreground px-1.5">
-                {row.original.status === "Done" ? (
-                    <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                ) : (
-                    <IconLoader />
-                )}
-                {row.original.status}
-            </Badge>
-        ),
-    },
-    {
-        accessorKey: "amount",
-        header: "Amount",
-        cell: ({ row }) => (
-            <Label
-                htmlFor={`${row.original.id}-target`}
-                className="text-sm font-medium"
-            >
-                {row.original.amount}
-            </Label>
-        ),
-    },
-    {
-        id: "actions",
-        cell: () => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                        size="icon"
+            ),
+        },
+        {
+            accessorKey: "category",
+            header: "Category",
+            cell: ({ row }) => (
+                <div className="w-32">
+                    <Badge
+                        variant="outline"
+                        className="text-muted-foreground px-1.5"
                     >
-                        <IconDotsVertical />
-                        <span className="sr-only">Open menu</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Make a copy</DropdownMenuItem>
-                    <DropdownMenuItem>Favorite</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    },
-];
+                        {row.original.category}
+                    </Badge>
+                </div>
+            ),
+        },
+        {
+            accessorKey: "date",
+            header: "Date",
+            cell: ({ row }) => (
+                <span className="text-sm">
+                    {format(new Date(row.original.date), "MMM dd, yyyy")}
+                </span>
+            ),
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge variant="outline" className="text-muted-foreground px-1.5">
+                    {row.original.status === "Done" ? (
+                        <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+                    ) : (
+                        <IconLoader />
+                    )}
+                    {row.original.status}
+                </Badge>
+            ),
+        },
+        {
+            accessorKey: "amount",
+            header: "Amount",
+            cell: ({ row }) => (
+                <Label
+                    htmlFor={`${row.original.id}-target`}
+                    className="text-sm font-medium"
+                >
+                    ${row.original.amount.toFixed(2)}
+                </Label>
+            ),
+        },
+        {
+            id: "actions",
+            cell: ({ row }) => (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                            size="icon"
+                        >
+                            <IconDotsVertical />
+                            <span className="sr-only">Open menu</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-32">
+                        <DropdownMenuItem onClick={() => onDelete(row.original.id)}>
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ),
+        },
+    ];
+}
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+function DraggableRow({ row }: { row: Row<Transaction> }) {
     const { transform, transition, setNodeRef, isDragging } = useSortable({
         id: row.original.id,
     });
@@ -245,11 +267,12 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
     );
 }
 
-export function DataTable({
-    data: initialData,
-}: {
-    data: z.infer<typeof schema>[];
-}) {
+interface DataTableProps {
+    data: Transaction[];
+    onRefresh?: () => void;
+}
+
+export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
     const [data, setData] = React.useState(() => initialData);
     const [rowSelection, setRowSelection] = React.useState({});
     const [columnVisibility, setColumnVisibility] =
@@ -261,6 +284,36 @@ export function DataTable({
         pageIndex: 0,
         pageSize: 10,
     });
+    const [deleteId, setDeleteId] = React.useState<number | null>(null);
+    const [isDeleting, setIsDeleting] = React.useState(false);
+
+    React.useEffect(() => {
+        setData(initialData);
+    }, [initialData]);
+
+    const handleDelete = async (id: number) => {
+        setDeleteId(id);
+    };
+
+    const confirmDelete = async () => {
+        if (deleteId === null) return;
+
+        setIsDeleting(true);
+        try {
+            await transactionAPI.delete(deleteId);
+            toast.success("Transaction deleted successfully!");
+            setDeleteId(null);
+            if (onRefresh) {
+                onRefresh();
+            }
+        } catch (error) {
+            console.error("Failed to delete transaction:", error);
+            toast.error("Failed to delete transaction");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     const sortableId = React.useId();
     const sensors = useSensors(
         useSensor(MouseSensor, {}),
@@ -272,6 +325,8 @@ export function DataTable({
         () => data?.map(({ id }) => id) || [],
         [data]
     );
+
+    const columns = React.useMemo(() => createColumns(handleDelete), []);
 
     const table = useReactTable({
         data,
@@ -569,6 +624,28 @@ export function DataTable({
             >
                 <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
             </TabsContent>
+
+            <AlertDialog open={deleteId !== null} onOpenChange={(open: boolean) => !open && setDeleteId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the
+                            transaction from the database.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            disabled={isDeleting}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Tabs>
     );
 }

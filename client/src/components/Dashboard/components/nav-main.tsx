@@ -13,19 +13,21 @@ import { Link } from "react-router-dom";
 
 export function NavMain({
     items,
+    onTransactionCreated,
 }: {
     items: {
         title: string;
         url: string;
         icon?: Icon;
     }[];
+    onTransactionCreated?: () => void;
 }) {
     return (
         <SidebarGroup>
             <SidebarGroupContent className="flex flex-col gap-2">
                 <SidebarMenu>
                     <SidebarMenuItem className="flex items-center gap-2">
-                        <AddTransactionDialog>
+                        <AddTransactionDialog onSuccess={onTransactionCreated}>
                             {/* Custom form or content here */}
                         </AddTransactionDialog>
                         <Button

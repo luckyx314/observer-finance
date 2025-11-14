@@ -22,10 +22,11 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export function NavUser({
-    user,
+    user: staticUser,
 }: {
     user: {
         name: string;
@@ -34,6 +35,30 @@ export function NavUser({
     };
 }) {
     const { isMobile } = useSidebar();
+    const { user: authUser, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const user = authUser
+        ? {
+              name: authUser.firstName && authUser.lastName
+                  ? `${authUser.firstName} ${authUser.lastName}`
+                  : authUser.email.split("@")[0],
+              email: authUser.email,
+              avatar: staticUser.avatar,
+          }
+        : staticUser;
+
+    const getInitials = () => {
+        if (authUser?.firstName && authUser?.lastName) {
+            return `${authUser.firstName[0]}${authUser.lastName[0]}`.toUpperCase();
+        }
+        return authUser?.email.substring(0, 2).toUpperCase() || "CN";
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
 
     return (
         <SidebarMenu>
@@ -50,7 +75,7 @@ export function NavUser({
                                     alt={user.name}
                                 />
                                 <AvatarFallback className="rounded-lg">
-                                    CN
+                                    {getInitials()}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -78,7 +103,7 @@ export function NavUser({
                                         alt={user.name}
                                     />
                                     <AvatarFallback className="rounded-lg">
-                                        CN
+                                        {getInitials()}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -107,12 +132,10 @@ export function NavUser({
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <Link to={"/login"}>
-                            <DropdownMenuItem>
-                                <IconLogout />
-                                Log out
-                            </DropdownMenuItem>
-                        </Link>
+                        <DropdownMenuItem onClick={handleLogout}>
+                            <IconLogout />
+                            Log out
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>

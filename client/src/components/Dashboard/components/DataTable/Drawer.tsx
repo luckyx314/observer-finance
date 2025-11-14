@@ -1,5 +1,4 @@
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { z } from "zod";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { categories } from "@/STATIC_DATA/STATIC_DATA";
-import type { schema } from "./DataTable";
+import type { Transaction } from "@/types";
 import { IconTrendingUp } from "@tabler/icons-react";
 
 const chartData = [
@@ -56,7 +55,7 @@ const chartConfig = {
 export default function TableCellViewer({
     item,
 }: {
-    item: z.infer<typeof schema>;
+    item: Transaction;
 }) {
     const isMobile = useIsMobile();
 
@@ -195,7 +194,7 @@ export default function TableCellViewer({
                         <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="amount">Amount</Label>
-                                <Input id="amount" defaultValue={item.amount} />
+                                <Input id="amount" type="number" defaultValue={item.amount} />
                             </div>
                         </div>
 

@@ -1,4 +1,26 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  UseGuards,
+  Request,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('user')
-export class UserController {}
+@Controller('users')
+@UseGuards(JwtAuthGuard)
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get('me')
+  async getProfile(@Request() req) {
+    return this.userService.findById(req.user.userId);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findById(id);
+  }
+}
