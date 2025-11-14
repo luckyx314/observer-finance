@@ -13,9 +13,10 @@ import type { Transaction } from "@/types";
 
 interface SectionCardsProps {
     transactions: Transaction[];
+    periodLabel: string;
 }
 
-export function SectionCards({ transactions }: SectionCardsProps) {
+export function SectionCards({ transactions, periodLabel }: SectionCardsProps) {
     const stats = useMemo(() => {
         const totalExpenses = transactions
             .filter((t) => t.type === "Expense")
@@ -59,7 +60,9 @@ export function SectionCards({ transactions }: SectionCardsProps) {
         <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
             <Card className="@container/card">
                 <CardHeader>
-                    <CardDescription>Total Expenses</CardDescription>
+                    <CardDescription>
+                        Total Expenses · {periodLabel}
+                    </CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl break-all">
                         {formatCurrency(stats.totalExpenses)}
                     </CardTitle>
@@ -74,16 +77,20 @@ export function SectionCards({ transactions }: SectionCardsProps) {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        All time expenses
+                        Spending overview
                     </div>
                     <div className="text-muted-foreground">
-                        From {stats.transactionCount} total transactions
+                        {periodLabel === "All time"
+                            ? `From ${stats.transactionCount} recorded transactions`
+                            : `From ${stats.transactionCount} transactions in ${periodLabel}`}
                     </div>
                 </CardFooter>
             </Card>
             <Card className="@container/card">
                 <CardHeader>
-                    <CardDescription>Total Income</CardDescription>
+                    <CardDescription>
+                        Total Income · {periodLabel}
+                    </CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl break-all">
                         {formatCurrency(stats.totalIncome)}
                     </CardTitle>
@@ -98,17 +105,21 @@ export function SectionCards({ transactions }: SectionCardsProps) {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        All time income{" "}
+                        Revenue snapshot{" "}
                         <IconTrendingUp className="size-4" />
                     </div>
                     <div className="text-muted-foreground">
-                        Revenue from all sources
+                        {periodLabel === "All time"
+                            ? "Across all sources"
+                            : `For ${periodLabel}`}
                     </div>
                 </CardFooter>
             </Card>
             <Card className="@container/card">
                 <CardHeader>
-                    <CardDescription>Total Savings</CardDescription>
+                    <CardDescription>
+                        Total Savings · {periodLabel}
+                    </CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl break-all">
                         {formatCurrency(stats.totalSavings)}
                     </CardTitle>
@@ -127,7 +138,9 @@ export function SectionCards({ transactions }: SectionCardsProps) {
                         <IconTrendingUp className="size-4" />
                     </div>
                     <div className="text-muted-foreground">
-                        Saved for the future
+                        {periodLabel === "All time"
+                            ? "Saved for the future"
+                            : `Saved during ${periodLabel}`}
                     </div>
                 </CardFooter>
             </Card>

@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Transaction } from "@/types";
-import { format, subDays, addDays, startOfDay } from "date-fns";
+import { format, subMonths, addMonths, startOfMonth } from "date-fns";
 
 export const description = "An interactive bar chart";
 
@@ -49,21 +49,15 @@ interface ChartAreaInteractiveProps {
 
 export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps) {
     const isMobile = useIsMobile();
-    const [timeRange, setTimeRange] = React.useState("90d");
-
-    React.useEffect(() => {
-        if (isMobile) {
-            setTimeRange("7d");
-        }
-    }, [isMobile]);
+    const [timeRange, setTimeRange] = React.useState(isMobile ? "6m" : "12m");
 
     const chartData = React.useMemo(() => {
-        // Group transactions by date
-        const dataByDate = new Map<string, { expenses: number; income: number }>();
+        // Group transactions by month
+        const dataByMonth = new Map<string, { expenses: number; income: number }>();
 
         transactions.forEach((transaction) => {
-            const dateKey = format(new Date(transaction.date), "yyyy-MM-dd");
-            const existing = dataByDate.get(dateKey) || { expenses: 0, income: 0 };
+            const monthKey = format(new Date(transaction.date), "yyyy-MM");
+            const existing = dataByMonth.get(monthKey) || { expenses: 0, income: 0 };
 
             if (transaction.type === "Expense") {
                 existing.expenses += transaction.amount;
@@ -71,50 +65,52 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                 existing.income += transaction.amount;
             }
 
-            dataByDate.set(dateKey, existing);
+            dataByMonth.set(monthKey, existing);
         });
 
         // Convert to array and sort by date
-        return Array.from(dataByDate.entries())
-            .map(([date, values]) => ({
-                date,
+        return Array.from(dataByMonth.entries())
+            .map(([month, values]) => ({
+                month,
                 expenses: values.expenses,
                 income: values.income,
+                label: format(new Date(`${month}-01T00:00:00`), "MMM yyyy"),
             }))
-            .sort((a, b) => a.date.localeCompare(b.date));
+            .sort((a, b) => a.month.localeCompare(b.month));
     }, [transactions]);
 
-    const chartDataByDate = React.useMemo(() => {
-        return new Map(chartData.map((entry) => [entry.date, entry]));
+    const chartDataByMonth = React.useMemo(() => {
+        return new Map(chartData.map((entry) => [entry.month, entry]));
     }, [chartData]);
 
     const filteredData = React.useMemo(() => {
-        const today = startOfDay(new Date());
-        let rangeLength = 90;
+        const today = startOfMonth(new Date());
+        let rangeLength = 12;
 
-        if (timeRange === "30d") {
-            rangeLength = 30;
-        } else if (timeRange === "7d") {
-            rangeLength = 7;
+        if (timeRange === "6m") {
+            rangeLength = 6;
+        } else if (timeRange === "3m") {
+            rangeLength = 3;
         }
 
-        const startDate = subDays(today, rangeLength - 1);
+        const startDate = subMonths(today, rangeLength - 1);
         const series = [];
 
-        for (let day = 0; day < rangeLength; day++) {
-            const current = addDays(startDate, day);
-            const key = format(current, "yyyy-MM-dd");
-            const point = chartDataByDate.get(key);
+        for (let monthIndex = 0; monthIndex < rangeLength; monthIndex++) {
+            const current = addMonths(startDate, monthIndex);
+            const key = format(current, "yyyy-MM");
+            const point = chartDataByMonth.get(key);
 
             series.push({
-                date: key,
+                month: key,
+                label: format(current, "MMM yyyy"),
                 expenses: point?.expenses ?? 0,
                 income: point?.income ?? 0,
             });
         }
 
         return series;
-    }, [chartDataByDate, timeRange]);
+    }, [chartDataByMonth, timeRange]);
 
     return (
         <Card className="@container/card">
@@ -122,9 +118,9 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                 <CardTitle>Income vs Expenses</CardTitle>
                 <CardDescription>
                     <span className="hidden @[540px]/card:block">
-                        Daily income and expenses overview
+                        Month-over-month income and expenses
                     </span>
-                    <span className="@[540px]/card:hidden">Daily overview</span>
+                    <span className="@[540px]/card:hidden">Monthly overview</span>
                 </CardDescription>
                 <CardAction>
                     <ToggleGroup
@@ -134,14 +130,14 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                         variant="outline"
                         className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
                     >
-                        <ToggleGroupItem value="90d">
+                        <ToggleGroupItem value="12m">
+                            Last 12 months
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="6m">
+                            Last 6 months
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="3m">
                             Last 3 months
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="30d">
-                            Last 30 days
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="7d">
-                            Last 7 days
                         </ToggleGroupItem>
                     </ToggleGroup>
                     <Select value={timeRange} onValueChange={setTimeRange}>
@@ -150,17 +146,17 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             size="sm"
                             aria-label="Select a value"
                         >
-                            <SelectValue placeholder="Last 3 months" />
+                            <SelectValue placeholder="Last 12 months" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                            <SelectItem value="90d" className="rounded-lg">
+                            <SelectItem value="12m" className="rounded-lg">
+                                Last 12 months
+                            </SelectItem>
+                            <SelectItem value="6m" className="rounded-lg">
+                                Last 6 months
+                            </SelectItem>
+                            <SelectItem value="3m" className="rounded-lg">
                                 Last 3 months
-                            </SelectItem>
-                            <SelectItem value="30d" className="rounded-lg">
-                                Last 30 days
-                            </SelectItem>
-                            <SelectItem value="7d" className="rounded-lg">
-                                Last 7 days
                             </SelectItem>
                         </SelectContent>
                     </Select>
@@ -221,18 +217,11 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                         </defs>
                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis
-                            dataKey="date"
+                            dataKey="label"
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
                             minTickGap={32}
-                            tickFormatter={(value) => {
-                                const date = new Date(value);
-                                return date.toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                });
-                            }}
                         />
                         <YAxis
                             tickLine={false}
@@ -251,15 +240,7 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             cursor={false}
                             content={
                                 <ChartTooltipContent
-                                    labelFormatter={(value) => {
-                                        return new Date(
-                                            value
-                                        ).toLocaleDateString("en-US", {
-                                            month: "short",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        });
-                                    }}
+                                    labelFormatter={(value) => value}
                                     indicator="dot"
                                 />
                             }

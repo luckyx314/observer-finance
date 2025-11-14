@@ -20,9 +20,14 @@ import type { Transaction } from "@/types";
 interface ChartPieCategoryProps {
     transactions: Transaction[];
     type: "Expense" | "Income";
+    periodLabel?: string;
 }
 
-export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) {
+export function ChartPieCategory({
+    transactions,
+    type,
+    periodLabel = "All time",
+}: ChartPieCategoryProps) {
     const chartData = React.useMemo(() => {
         const filteredTransactions = transactions.filter((t) => t.type === type);
 
@@ -96,7 +101,9 @@ export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) 
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
                 <CardTitle>{type} by Category</CardTitle>
-                <CardDescription>Breakdown of {type.toLowerCase()} categories</CardDescription>
+                <CardDescription>
+                    {periodLabel} {type.toLowerCase()} mix
+                </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
                 <ChartContainer
@@ -182,6 +189,11 @@ export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) 
                             {topCategory.category}
                         </span>{" "}
                         ({topCategory.percentage.toFixed(1)}% of total)
+                    </p>
+                )}
+                {!chartData.length && (
+                    <p className="mt-4 text-sm text-muted-foreground text-center">
+                        No {type.toLowerCase()} data for {periodLabel.toLowerCase()}.
                     </p>
                 )}
             </CardContent>
