@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Transaction } from "@/types";
-import { format, subDays } from "date-fns";
+import { format, subDays, addDays, startOfDay } from "date-fns";
 
 export const description = "An interactive area chart";
 
@@ -84,23 +84,37 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
             .sort((a, b) => a.date.localeCompare(b.date));
     }, [transactions]);
 
+    const chartDataByDate = React.useMemo(() => {
+        return new Map(chartData.map((entry) => [entry.date, entry]));
+    }, [chartData]);
+
     const filteredData = React.useMemo(() => {
-        const today = new Date();
-        let daysToSubtract = 90;
+        const today = startOfDay(new Date());
+        let rangeLength = 90;
 
         if (timeRange === "30d") {
-            daysToSubtract = 30;
+            rangeLength = 30;
         } else if (timeRange === "7d") {
-            daysToSubtract = 7;
+            rangeLength = 7;
         }
 
-        const startDate = subDays(today, daysToSubtract);
+        const startDate = subDays(today, rangeLength - 1);
+        const series = [];
 
-        return chartData.filter((item) => {
-            const itemDate = new Date(item.date);
-            return itemDate >= startDate && itemDate <= today;
-        });
-    }, [chartData, timeRange]);
+        for (let day = 0; day < rangeLength; day++) {
+            const current = addDays(startDate, day);
+            const key = format(current, "yyyy-MM-dd");
+            const point = chartDataByDate.get(key);
+
+            series.push({
+                date: key,
+                expenses: point?.expenses ?? 0,
+                income: point?.income ?? 0,
+            });
+        }
+
+        return series;
+    }, [chartDataByDate, timeRange]);
 
     return (
         <Card className="@container/card">
@@ -155,9 +169,17 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
             <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
                 <ChartContainer
                     config={chartConfig}
-                    className="aspect-auto h-[250px] w-full"
+                    className="aspect-auto h-[300px] w-full"
                 >
-                    <AreaChart data={filteredData}>
+                    <AreaChart
+                        data={filteredData}
+                        margin={{
+                            top: 10,
+                            right: 10,
+                            left: 10,
+                            bottom: 30,
+                        }}
+                    >
                         <defs>
                             <linearGradient
                                 id="expenses"
@@ -196,7 +218,7 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                                 />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid vertical={false} />
+                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
                         <XAxis
                             dataKey="date"
                             tickLine={false}
@@ -211,6 +233,19 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                                 });
                             }}
                         />
+                        <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={8}
+                            tickFormatter={(value) => {
+                                return new Intl.NumberFormat("en-US", {
+                                    style: "currency",
+                                    currency: "USD",
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0,
+                                }).format(value);
+                            }}
+                        />
                         <ChartTooltip
                             cursor={false}
                             content={
@@ -221,6 +256,7 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                                         ).toLocaleDateString("en-US", {
                                             month: "short",
                                             day: "numeric",
+                                            year: "numeric",
                                         });
                                     }}
                                     indicator="dot"
@@ -233,7 +269,6 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             fill="url(#fillIncome)"
                             stroke="hsl(200, 70%, 60%)"
                             strokeWidth={2}
-                            stackId="a"
                         />
                         <Area
                             dataKey="expenses"
@@ -241,7 +276,6 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             fill="url(#expenses)"
                             stroke="hsl(285, 65%, 52%)"
                             strokeWidth={2}
-                            stackId="a"
                         />
                     </AreaChart>
                 </ChartContainer>
