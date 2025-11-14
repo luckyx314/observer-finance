@@ -1,12 +1,11 @@
-import { useMemo, useState } from "react";
-import { format } from "date-fns";
-
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { categories } from "@/STATIC_DATA/STATIC_DATA";
 import type { PaymentReminderInput } from "@/components/Budgets/types";
 import { toast } from "sonner";
+import { DatePickerComponent } from "@/components/DatePicker/DatePicker";
 
 interface PaymentReminderFormProps {
     onSubmit: (input: PaymentReminderInput) => Promise<boolean>;
@@ -21,20 +20,15 @@ export function PaymentReminderForm({
     const [name, setName] = useState("");
     const [category, setCategory] = useState(fallbackCategory);
     const [amount, setAmount] = useState("");
-    const [dueDate, setDueDate] = useState("");
+    const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
     const [autoPay, setAutoPay] = useState(true);
     const [saving, setSaving] = useState(false);
-
-    const minDate = useMemo(
-        () => format(new Date(), "yyyy-MM-dd"),
-        []
-    );
 
     const resetForm = () => {
         setName("");
         setCategory(fallbackCategory);
         setAmount("");
-        setDueDate("");
+        setDueDate(undefined);
         setAutoPay(true);
     };
 
@@ -57,7 +51,7 @@ export function PaymentReminderForm({
                 name: name.trim(),
                 category,
                 amount: parsedAmount,
-                dueDate,
+                dueDate: dueDate.toISOString().split("T")[0],
                 autoPay,
             });
 
@@ -112,13 +106,10 @@ export function PaymentReminderForm({
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="payment-date">Due date</Label>
-                    <Input
-                        id="payment-date"
-                        type="date"
-                        value={dueDate}
-                        min={minDate}
-                        onChange={(event) => setDueDate(event.target.value)}
+                    <Label>Due date</Label>
+                    <DatePickerComponent
+                        onDateChange={(date) => setDueDate(date ?? undefined)}
+                        defaultDate={dueDate}
                         required
                     />
                 </div>

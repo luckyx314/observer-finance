@@ -47,13 +47,17 @@ export function DatePickerComponent({ onDateChange, defaultDate, required }: Dat
                     variant="outline"
                     data-empty={!date}
                     aria-required={required}
-                    className="data-[empty=true]:text-muted-foreground"
+                    className="w-full justify-between data-[empty=true]:text-muted-foreground"
                 >
                     <CalendarIcon />
                     {date ? format(date, "PPP") : <span>Pick a date</span>}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent
+                align="start"
+                className="p-0"
+                style={{ width: "var(--radix-popover-trigger-width)" }}
+            >
                 <div className="flex flex-col">
                     <Calendar mode="single" selected={date} onSelect={handleDateChange} />
                     <div className="border-t p-3">
