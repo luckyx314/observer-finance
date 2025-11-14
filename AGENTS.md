@@ -7,10 +7,10 @@
 
 ## Build, Test, and Development Commands
 ```bash
-cd client && npm install && npm run dev        # Vite dev server at :5173
+cd client && npm install && npm run dev        # Vite dev server at :5174
 cd client && npm run build && npm run preview  # Type-check + production bundle
 cd server && npm install && npm run seed       # Populate SQLite with demo data
-cd server && npm run start:dev                 # NestJS watcher at :3000/api
+cd server && npm run start:dev                 # NestJS watcher at :3100/api
 cd server && npm run test                      # Jest unit tests
 cd server && npm run lint                      # ESLint across src/apps/libs/test
 ```

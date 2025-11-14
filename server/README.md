@@ -41,7 +41,7 @@ cp .env.example .env
 
 3. Update the `.env` file with your configuration:
 ```env
-PORT=3000
+PORT=3100
 JWT_SECRET=your-secret-key-change-in-production
 ```
 
@@ -58,7 +58,7 @@ npm run build
 npm run start:prod
 ```
 
-The API will be available at `http://localhost:3000/api`
+The API will be available at `http://localhost:3100/api`
 
 ## API Endpoints
 

@@ -26,7 +26,7 @@ npm run seed
 npm run start:dev
 ```
 
-The API will be available at `http://localhost:3000/api`
+The API will be available at `http://localhost:3100/api`
 
 ### Demo Credentials
 
@@ -51,7 +51,7 @@ Create `client/src/services/api.ts`:
 ```typescript
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3100/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -348,14 +348,14 @@ export const useAuth = () => {
 
 1. Start the backend server (`npm run start:dev` in server directory)
 2. Start the frontend dev server (`npm run dev` in client directory)
-3. Navigate to `http://localhost:5173`
+3. Navigate to `http://localhost:5174`
 4. Login with demo credentials
 5. Test CRUD operations on transactions
 
 ## Troubleshooting
 
 ### CORS Issues
-If you encounter CORS errors, ensure the backend is configured to allow requests from `http://localhost:5173`.
+If you encounter CORS errors, ensure the backend is configured to allow requests from `http://localhost:5174`.
 
 ### Token Expiration
 JWT tokens expire after 7 days. Implement a refresh token mechanism or handle token expiration gracefully.

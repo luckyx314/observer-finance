@@ -249,7 +249,7 @@ Components & UI
 ## Development Workflow
 
 ### Scripts
-- `npm run dev` - Start Vite dev server (http://localhost:5173)
+- `npm run dev` - Start Vite dev server (http://localhost:5174)
 - `npm run build` - TypeScript check + Vite build
 - `npm run lint` - Run ESLint
 - `npm run preview` - Preview production build
@@ -347,7 +347,7 @@ Components & UI
 - Optimized chunks for production
 
 ### Development Server
-- Vite on port 5173 (default)
+- Vite on port 5174 (default)
 - Fast HMR (Hot Module Replacement)
 - React Refresh for instant component updates
 
@@ -406,7 +406,7 @@ Components & UI
    ```
 
 4. **Access application:**
-   Open http://localhost:5173 in browser
+   Open http://localhost:5174 in browser
 
 5. **Build for production:**
    ```bash
@@ -439,4 +439,3 @@ Components & UI
 - `/home/l/projects/observer-finance/client/vite.config.ts`
 - `/home/l/projects/observer-finance/client/tsconfig.json`
 - `/home/l/projects/observer-finance/client/components.json`
-

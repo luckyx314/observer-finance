@@ -58,7 +58,7 @@ npm run seed
 npm run start:dev
 ```
 
-Server will run at `http://localhost:3000/api`
+Server will run at `http://localhost:3100/api`
 
 **Demo Credentials:**
 - Email: `demo@example.com`
@@ -81,7 +81,7 @@ npm install
 npm run dev
 ```
 
-Application will run at `http://localhost:5173`
+Application will run at `http://localhost:5174`
 
 ## Features
 
