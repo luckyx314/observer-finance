@@ -13,7 +13,6 @@ import {
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
 } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
 import type { Transaction } from "@/types";

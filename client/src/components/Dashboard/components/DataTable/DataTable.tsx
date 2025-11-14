@@ -29,7 +29,6 @@ import {
     IconGripVertical,
     IconLayoutColumns,
     IconLoader,
-    IconPlus,
 } from "@tabler/icons-react";
 import {
     flexRender,

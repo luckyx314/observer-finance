@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { categoryByType, transactionType, fieldLabelsByType } from "@/STATIC_DATA/STATIC_DATA";
-import type { Transaction, TransactionStatus } from "@/types";
+import type { Transaction, TransactionStatus, TransactionType as TransactionTypeEnum } from "@/types";
 import { useState, useMemo, useEffect } from "react";
 import { transactionAPI } from "@/services/api";
 import { toast } from "sonner";
@@ -44,7 +44,7 @@ export default function TableCellViewer({
     const isMobile = useIsMobile();
 
     // Form state
-    const [selectedType, setSelectedType] = useState(item.type);
+    const [selectedType, setSelectedType] = useState<TransactionTypeEnum>(item.type);
     const [merchant, setMerchant] = useState(item.merchant);
     const [category, setCategory] = useState(item.category);
     const [status, setStatus] = useState(item.status);
@@ -86,7 +86,7 @@ export default function TableCellViewer({
     }, [open, item]);
 
     // Reset category when type changes if current category is not in new type's categories
-    const handleTypeChange = (newType: string) => {
+    const handleTypeChange = (newType: TransactionTypeEnum) => {
         setSelectedType(newType);
         if (!currentCategories.includes(category)) {
             setCategory("");
@@ -189,7 +189,7 @@ export default function TableCellViewer({
                             <Label htmlFor="transaction-type">Transaction Type</Label>
                             <Select
                                 value={selectedType}
-                                onValueChange={handleTypeChange}
+                                onValueChange={(value) => handleTypeChange(value as TransactionTypeEnum)}
                                 disabled={loading}
                             >
                                 <SelectTrigger id="transaction-type" className="w-full">
