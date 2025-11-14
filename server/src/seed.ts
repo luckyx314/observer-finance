@@ -4,6 +4,8 @@ import { UserService } from './user/user.service';
 import { TransactionService } from './transaction/transaction.service';
 import { TransactionType, TransactionStatus } from './transaction/entities/transaction.entity';
 import { WalletService } from './wallet/wallet.service';
+import { BudgetService } from './budget/budget.service';
+import { PaymentReminderService } from './payment-reminder/payment-reminder.service';
 import * as bcrypt from 'bcrypt';
 
 async function seed() {
@@ -11,6 +13,8 @@ async function seed() {
   const userService = app.get(UserService);
   const transactionService = app.get(TransactionService);
   const walletService = app.get(WalletService);
+  const budgetService = app.get(BudgetService);
+  const paymentReminderService = app.get(PaymentReminderService);
 
   console.log('🌱 Seeding database...');
 
@@ -37,6 +41,39 @@ async function seed() {
   }
 
   console.log('✅ Created', wallets.length, 'sample wallets');
+
+  const budgets = [
+    {
+      label: 'Food & Dining',
+      category: 'Food',
+      limit: 9000,
+      description: 'Groceries, cafes, deliveries',
+    },
+    {
+      label: 'Transportation',
+      category: 'Transportation',
+      limit: 4200,
+      description: 'Fuel, ride shares, passes',
+    },
+    {
+      label: 'Bills & Utilities',
+      category: 'Bills',
+      limit: 6800,
+      description: 'Recurring bills and utilities',
+    },
+    {
+      label: 'Entertainment',
+      category: 'Entertainment',
+      limit: 2400,
+      description: 'Streaming, nights out',
+    },
+  ];
+
+  for (const budget of budgets) {
+    await budgetService.create(budget, user.id);
+  }
+
+  console.log('✅ Created', budgets.length, 'sample budgets');
 
   // Create sample transactions
   const transactions = [
@@ -110,6 +147,36 @@ async function seed() {
   }
 
   console.log('✅ Created', transactions.length, 'sample transactions');
+
+  const reminders = [
+    {
+      name: 'Power & Water',
+      category: 'Bills',
+      amount: 3200,
+      dueDate: '2025-11-18',
+      autoPay: true,
+    },
+    {
+      name: 'Wellness Subscription',
+      category: 'Healthcare',
+      amount: 1450,
+      dueDate: '2025-11-22',
+      autoPay: false,
+    },
+    {
+      name: 'Streaming Bundle',
+      category: 'Entertainment',
+      amount: 850,
+      dueDate: '2025-11-26',
+      autoPay: true,
+    },
+  ];
+
+  for (const reminder of reminders) {
+    await paymentReminderService.create(reminder, user.id);
+  }
+
+  console.log('✅ Created', reminders.length, 'payment reminders');
   console.log('');
   console.log('📝 Demo Credentials:');
   console.log('   Email: demo@example.com');

@@ -69,6 +69,30 @@ export interface Wallet {
   updatedAt?: string;
 }
 
+export interface Budget {
+  id: number;
+  label: string;
+  category: string;
+  limit: number;
+  description?: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentReminder {
+  id: number;
+  name: string;
+  category: string;
+  amount: number;
+  dueDate: string;
+  autoPay: boolean;
+  status?: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UpdateTransactionDto {
   merchant?: string;
   category?: string;

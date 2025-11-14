@@ -41,16 +41,23 @@ export function NavMain({
                     </SidebarMenuItem>
                 </SidebarMenu>
                 <SidebarMenu>
-                    {items.map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                            <Link to={`/${String(item.title).toLowerCase()}`}>
-                                <SidebarMenuButton tooltip={item.title}>
-                                    {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
-                                </SidebarMenuButton>
-                            </Link>
-                        </SidebarMenuItem>
-                    ))}
+                    {items.map((item) => {
+                        const targetUrl =
+                            item.url?.startsWith("/")
+                                ? item.url
+                                : `/${String(item.title).toLowerCase()}`;
+
+                        return (
+                            <SidebarMenuItem key={item.title}>
+                                <Link to={targetUrl}>
+                                    <SidebarMenuButton tooltip={item.title}>
+                                        {item.icon && <item.icon />}
+                                        <span>{item.title}</span>
+                                    </SidebarMenuButton>
+                                </Link>
+                            </SidebarMenuItem>
+                        );
+                    })}
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>

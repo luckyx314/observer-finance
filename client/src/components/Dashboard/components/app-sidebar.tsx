@@ -1,6 +1,10 @@
 import * as React from "react";
 import {
+    IconCash,
+    IconChartLine,
     IconDashboard,
+    IconUser,
+    IconWallet,
 } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/Dashboard/components/nav-main";
@@ -25,8 +29,28 @@ const data = {
     navMain: [
         {
             title: "Dashboard",
-            url: "#",
+            url: "/dashboard",
             icon: IconDashboard,
+        },
+        {
+            title: "Budgets",
+            url: "/budgets",
+            icon: IconWallet,
+        },
+        {
+            title: "Income",
+            url: "/income",
+            icon: IconCash,
+        },
+        {
+            title: "Investments",
+            url: "/investments",
+            icon: IconChartLine,
+        },
+        {
+            title: "Account",
+            url: "/account",
+            icon: IconUser,
         },
     ],
     

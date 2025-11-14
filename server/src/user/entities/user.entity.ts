@@ -9,6 +9,8 @@ import {
 import { Exclude } from 'class-transformer';
 import { Transaction } from '../../transaction/entities/transaction.entity';
 import { Wallet } from '../../wallet/entities/wallet.entity';
+import { Budget } from '../../budget/entities/budget.entity';
+import { PaymentReminder } from '../../payment-reminder/entities/payment-reminder.entity';
 
 @Entity('users')
 export class User {
@@ -58,4 +60,10 @@ export class User {
 
   @OneToMany(() => Wallet, (wallet) => wallet.user)
   wallets: Wallet[];
+
+  @OneToMany(() => Budget, (budget) => budget.user)
+  budgets: Budget[];
+
+  @OneToMany(() => PaymentReminder, (reminder) => reminder.user)
+  paymentReminders: PaymentReminder[];
 }

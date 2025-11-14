@@ -8,6 +8,8 @@ import type {
     User,
     ApiMessageResponse,
     Wallet,
+    Budget,
+    PaymentReminder,
 } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3100/api";
@@ -190,6 +192,52 @@ export const walletAPI = {
     },
     remove: async (id: number): Promise<void> => {
         await api.delete(`/wallets/${id}`);
+    },
+};
+
+export const budgetAPI = {
+    getAll: async (): Promise<Budget[]> => {
+        const response = await api.get<Budget[]>("/budgets");
+        return response.data;
+    },
+    create: async (
+        budget: Pick<Budget, "label" | "category" | "limit" | "description">
+    ): Promise<Budget> => {
+        const response = await api.post<Budget>("/budgets", budget);
+        return response.data;
+    },
+    update: async (
+        id: number,
+        budget: Partial<Pick<Budget, "label" | "category" | "limit" | "description">>
+    ): Promise<Budget> => {
+        const response = await api.patch<Budget>(`/budgets/${id}`, budget);
+        return response.data;
+    },
+    remove: async (id: number): Promise<void> => {
+        await api.delete(`/budgets/${id}`);
+    },
+};
+
+export const paymentReminderAPI = {
+    getAll: async (): Promise<PaymentReminder[]> => {
+        const response = await api.get<PaymentReminder[]>("/payments");
+        return response.data;
+    },
+    create: async (
+        reminder: Pick<PaymentReminder, "name" | "category" | "amount" | "dueDate" | "autoPay" | "status">
+    ): Promise<PaymentReminder> => {
+        const response = await api.post<PaymentReminder>("/payments", reminder);
+        return response.data;
+    },
+    update: async (
+        id: number,
+        reminder: Partial<Omit<PaymentReminder, "id" | "userId" | "createdAt" | "updatedAt">>
+    ): Promise<PaymentReminder> => {
+        const response = await api.patch<PaymentReminder>(`/payments/${id}`, reminder);
+        return response.data;
+    },
+    remove: async (id: number): Promise<void> => {
+        await api.delete(`/payments/${id}`);
     },
 };
 

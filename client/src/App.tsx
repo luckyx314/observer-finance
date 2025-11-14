@@ -5,6 +5,7 @@ import VerifyEmail from "./components/Authentication/VerifyEmail";
 import ForgotPassword from "./components/Authentication/ForgotPassword";
 import ResetPassword from "./components/Authentication/ResetPassword";
 import Dashboard from "./components/Dashboard/Dashboard";
+import Budgets from "./components/Budgets/Budgets";
 import Income from "./components/Income/Income";
 import Investments from "./components/Investments/Investments";
 import Account from "./components/Account/Account";
@@ -30,6 +31,14 @@ const App = () => {
                             element={
                                 <ProtectedRoute>
                                     <Dashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/budgets"
+                            element={
+                                <ProtectedRoute>
+                                    <Budgets />
                                 </ProtectedRoute>
                             }
                         />
