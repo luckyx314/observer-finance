@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -30,7 +30,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Transaction } from "@/types";
 import { format, subDays, addDays, startOfDay } from "date-fns";
 
-export const description = "An interactive area chart";
+export const description = "An interactive bar chart";
 
 const chartConfig = {
     expenses: {
@@ -171,7 +171,7 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                     config={chartConfig}
                     className="aspect-auto h-[300px] w-full"
                 >
-                    <AreaChart
+                    <BarChart
                         data={filteredData}
                         margin={{
                             top: 10,
@@ -179,10 +179,11 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                             left: 10,
                             bottom: 30,
                         }}
+                        barCategoryGap="30%"
                     >
                         <defs>
                             <linearGradient
-                                id="expenses"
+                                id="expensesGradient"
                                 x1="0"
                                 y1="0"
                                 x2="0"
@@ -200,7 +201,7 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                                 />
                             </linearGradient>
                             <linearGradient
-                                id="fillIncome"
+                                id="incomeGradient"
                                 x1="0"
                                 y1="0"
                                 x2="0"
@@ -263,21 +264,21 @@ export function ChartAreaInteractive({ transactions }: ChartAreaInteractiveProps
                                 />
                             }
                         />
-                        <Area
+                        <Bar
                             dataKey="income"
-                            type="natural"
-                            fill="url(#fillIncome)"
+                            fill="url(#incomeGradient)"
                             stroke="hsl(200, 70%, 60%)"
-                            strokeWidth={2}
+                            barSize={10}
+                            radius={[6, 6, 0, 0]}
                         />
-                        <Area
+                        <Bar
                             dataKey="expenses"
-                            type="natural"
-                            fill="url(#expenses)"
+                            fill="url(#expensesGradient)"
                             stroke="hsl(285, 65%, 52%)"
-                            strokeWidth={2}
+                            barSize={10}
+                            radius={[6, 6, 0, 0]}
                         />
-                    </AreaChart>
+                    </BarChart>
                 </ChartContainer>
             </CardContent>
         </Card>
