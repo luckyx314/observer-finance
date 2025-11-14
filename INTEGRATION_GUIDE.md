@@ -26,7 +26,7 @@ npm run seed
 npm run start:dev
 ```
 
-The API will be available at `http://localhost:3100/api`
+The API will be available at `http://localhost:3100/api`. Configure `APP_URL` and SMTP credentials in `server/.env` so registration and password reset emails are delivered. Without SMTP values, emails are logged to the server console for development.
 
 ### Demo Credentials
 
@@ -78,6 +78,22 @@ export const authAPI = {
   },
   register: async (email: string, password: string, firstName?: string, lastName?: string) => {
     const response = await api.post('/auth/register', { email, password, firstName, lastName });
+    return response.data;
+  },
+  verifyEmail: async (email: string, code: string) => {
+    const response = await api.post('/auth/verify-email', { email, code });
+    return response.data;
+  },
+  resendVerification: async (email: string) => {
+    const response = await api.post('/auth/resend-verification', { email });
+    return response.data;
+  },
+  forgotPassword: async (email: string) => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+  resetPassword: async (token: string, password: string) => {
+    const response = await api.post('/auth/reset-password', { token, password });
     return response.data;
   },
 };
@@ -344,13 +360,28 @@ export const useAuth = () => {
 5. Add toast notifications for CRUD operations
 6. Implement real-time updates (optional, using WebSockets)
 
+## Email Verification Flow
+
+1. `POST /api/auth/register` returns `{ access_token, user }` immediately. Persist the session like a normal login, and use `user.isEmailVerified` to decide whether to remind them about verification.
+2. Prompt the user for the 6-digit code delivered after login and call `POST /api/auth/verify-email` with `{ email, code }`.
+3. Successful verification also returns `{ access_token, user }`; replace the stored session so the UI reflects the verified status.
+4. If a code expires, call `POST /api/auth/resend-verification` to send a fresh one. The API responds with a simple `{ message }`.
+
+## Password Reset Flow
+
+1. Expose a "Forgot password" screen that calls `POST /api/auth/forgot-password` with only the user email.
+2. The backend generates a signed token, stores a hashed version, and emails a link built from `APP_URL` (defaults to `http://localhost:5174`). In development, the email content is logged if SMTP isn’t configured.
+3. Your reset form should read the `token` query param and submit it with the new password to `POST /api/auth/reset-password`.
+4. Tokens expire after 30 minutes; display the API’s error message and prompt the user to restart the flow when that happens.
+
 ## Testing the Integration
 
 1. Start the backend server (`npm run start:dev` in server directory)
 2. Start the frontend dev server (`npm run dev` in client directory)
 3. Navigate to `http://localhost:5174`
-4. Login with demo credentials
-5. Test CRUD operations on transactions
+4. Register a new user, verify the email using the `/verify-email` route, then log in
+5. Exercise the forgot-password flow to ensure emails (or console logs) show the reset link
+6. Login with demo credentials and test CRUD operations on transactions
 
 ## Troubleshooting
 

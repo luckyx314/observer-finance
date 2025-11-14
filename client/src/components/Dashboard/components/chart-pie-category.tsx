@@ -83,6 +83,15 @@ export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) 
         return config;
     }, [chartData]);
 
+    const topCategory = React.useMemo(() => {
+        if (!chartData.length || totalAmount === 0) return null;
+        const [top] = chartData;
+        return {
+            ...top,
+            percentage: (top.amount / totalAmount) * 100,
+        };
+    }, [chartData, totalAmount]);
+
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">
@@ -99,12 +108,25 @@ export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) 
                             cursor={false}
                             content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
+                                    const value = Number(payload[0].value) || 0;
+                                    const percent = totalAmount
+                                        ? (value / totalAmount) * 100
+                                        : 0;
                                     return (
                                         <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                            <div className="grid gap-2">
-                                                <div className="font-medium">{payload[0].name}</div>
+                                            <div className="grid gap-1">
+                                                <div className="font-medium">
+                                                    {payload[0].name}
+                                                </div>
                                                 <div className="text-sm text-muted-foreground">
-                                                    ₱{Number(payload[0].value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    ₱
+                                                    {value.toLocaleString("en-PH", {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    })}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {percent.toFixed(1)}% of total
                                                 </div>
                                             </div>
                                         </div>
@@ -153,6 +175,15 @@ export function ChartPieCategory({ transactions, type }: ChartPieCategoryProps) 
                         </Pie>
                     </PieChart>
                 </ChartContainer>
+                {topCategory && (
+                    <p className="mt-4 text-sm text-muted-foreground text-center">
+                        Top category:{" "}
+                        <span className="font-medium text-foreground">
+                            {topCategory.category}
+                        </span>{" "}
+                        ({topCategory.percentage.toFixed(1)}% of total)
+                    </p>
+                )}
             </CardContent>
         </Card>
     );

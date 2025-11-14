@@ -50,7 +50,14 @@ export function SignupForm({
                 lastName || undefined
             );
             login(response.access_token, response.user);
-            toast.success("Account created successfully!");
+
+            if (!response.user.isEmailVerified) {
+                toast.success(
+                    "You're in! Check your email for the verification code to fully activate your account."
+                );
+            } else {
+                toast.success("Account created successfully!");
+            }
             navigate("/dashboard");
         } catch (error: any) {
             const errorMessage =

@@ -6,6 +6,7 @@ import type {
     CreateTransactionDto,
     UpdateTransactionDto,
     User,
+    ApiMessageResponse,
 } from "@/types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3100/api";
@@ -64,6 +65,38 @@ export const authAPI = {
             password,
             firstName,
             lastName,
+        });
+        return response.data;
+    },
+
+    verifyEmail: async (email: string, code: string): Promise<LoginResponse> => {
+        const response = await api.post<LoginResponse>("/auth/verify-email", {
+            email,
+            code,
+        });
+        return response.data;
+    },
+
+    resendVerification: async (email: string): Promise<ApiMessageResponse> => {
+        const response = await api.post<ApiMessageResponse>(
+            "/auth/resend-verification",
+            { email }
+        );
+        return response.data;
+    },
+
+    forgotPassword: async (email: string): Promise<ApiMessageResponse> => {
+        const response = await api.post<ApiMessageResponse>(
+            "/auth/forgot-password",
+            { email }
+        );
+        return response.data;
+    },
+
+    resetPassword: async (token: string, password: string): Promise<ApiMessageResponse> => {
+        const response = await api.post<ApiMessageResponse>("/auth/reset-password", {
+            token,
+            password,
         });
         return response.data;
     },

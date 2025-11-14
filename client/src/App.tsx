@@ -1,6 +1,9 @@
 import LoginForm from "./components/Authentication/LoginForm";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { SignupForm } from "./components/Authentication/SignupForm";
+import VerifyEmail from "./components/Authentication/VerifyEmail";
+import ForgotPassword from "./components/Authentication/ForgotPassword";
+import ResetPassword from "./components/Authentication/ResetPassword";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Income from "./components/Income/Income";
 import Investments from "./components/Investments/Investments";
@@ -19,6 +22,9 @@ const App = () => {
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route path="/login" element={<LoginForm />} />
                         <Route path="/signup" element={<SignupForm />} />
+                        <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route
                             path="/dashboard"
                             element={

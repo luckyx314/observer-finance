@@ -19,6 +19,7 @@ async function seed() {
     password: hashedPassword,
     firstName: 'Demo',
     lastName: 'User',
+    isEmailVerified: true,
   });
 
   console.log('✅ Created demo user:', user.email);

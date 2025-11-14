@@ -418,6 +418,11 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
         getFacetedUniqueValues: getFacetedUniqueValues(),
     });
 
+    const statusColumn = React.useMemo(
+        () => table.getAllColumns().find((column) => column.id === "status"),
+        [table]
+    );
+
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
         if (active && over && active.id !== over.id) {
@@ -891,36 +896,38 @@ export function DataTable({ data: initialData, onRefresh }: DataTableProps) {
                         }
                         className="max-w-sm"
                     />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <IconChevronDown />
-                                Status
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-48">
-                            {Array.from(table.getColumn("status")?.getFacetedUniqueValues()?.keys() ?? []).map((status) => (
-                                <DropdownMenuCheckboxItem
-                                    key={status}
-                                    checked={
-                                        (table.getColumn("status")?.getFilterValue() as string[])?.includes(status) ?? false
-                                    }
-                                    onCheckedChange={(checked) => {
-                                        const currentFilter = (table.getColumn("status")?.getFilterValue() as string[]) ?? [];
-                                        if (checked) {
-                                            table.getColumn("status")?.setFilterValue([...currentFilter, status]);
-                                        } else {
-                                            table.getColumn("status")?.setFilterValue(
-                                                currentFilter.filter((s) => s !== status)
-                                            );
+                    {statusColumn && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <IconChevronDown />
+                                    Status
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-48">
+                                {Array.from(statusColumn.getFacetedUniqueValues()?.keys() ?? []).map((status) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={status}
+                                        checked={
+                                            (statusColumn.getFilterValue() as string[])?.includes(status) ?? false
                                         }
-                                    }}
-                                >
-                                    {status}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                        onCheckedChange={(checked) => {
+                                            const currentFilter = (statusColumn.getFilterValue() as string[]) ?? [];
+                                            if (checked) {
+                                                statusColumn.setFilterValue([...currentFilter, status]);
+                                            } else {
+                                                statusColumn.setFilterValue(
+                                                    currentFilter.filter((s) => s !== status)
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        {status}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
                 <div className="overflow-hidden rounded-lg border">
                     <DndContext

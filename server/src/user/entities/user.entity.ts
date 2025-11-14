@@ -27,6 +27,25 @@ export class User {
   @Column({ nullable: true })
   lastName: string;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ nullable: true })
+  @Exclude()
+  emailVerificationCode: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  @Exclude()
+  emailVerificationCodeExpiresAt: Date | null;
+
+  @Column({ nullable: true })
+  @Exclude()
+  passwordResetToken: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  @Exclude()
+  passwordResetTokenExpiresAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

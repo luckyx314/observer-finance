@@ -48,12 +48,18 @@ cd server
 npm install
 ```
 
-3. Seed the database with demo data:
+3. Configure environment variables (SMTP + app URL):
+```bash
+cp .env.example .env
+# update APP_URL, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_FROM
+```
+
+4. Seed the database with demo data:
 ```bash
 npm run seed
 ```
 
-4. Start the development server:
+5. Start the development server:
 ```bash
 npm run start:dev
 ```
@@ -87,6 +93,8 @@ Application will run at `http://localhost:5174`
 
 ### Current Features
 - ✅ User authentication (register/login)
+- ✅ Email verification via 6-digit OTPs (sent post-login)
+- ✅ Password reset flow with secure reset links
 - ✅ Transaction management (CRUD operations)
 - ✅ Transaction filtering by type and category
 - ✅ Dashboard with data visualization
@@ -140,6 +148,12 @@ cd client
 npm run build
 npm run preview
 ```
+
+### Account Security & Email Delivery
+- Registration/login immediately return a session token; an OTP email is dispatched right after login so the user can verify from their inbox when convenient. Use `/verify-email` (frontend or API) to complete the process.
+- `APP_URL` (defaults to `http://localhost:5174`) is used to craft verification/password reset links. Update it if the client runs elsewhere.
+- Configure SMTP credentials in `server/.env` so NestJS can send verification codes and reset links. Without SMTP, emails are logged to the server console for debugging.
+- Forgot-password links are triggered via the `/forgot-password` screen (frontend) or POST `/auth/forgot-password`; tokens expire after 30 minutes.
 
 ## Project Documentation
 

@@ -178,6 +178,9 @@ client/
 /              -> LoginForm (default)
 /login         -> LoginForm
 /signup        -> SignupForm
+/verify-email  -> VerifyEmail (email confirmation form)
+/forgot-password -> ForgotPassword (request reset link)
+/reset-password  -> ResetPassword (submit new password via token)
 /dashboard     -> Dashboard (main page with sidebar, charts, data table)
 /income        -> Income (stub page)
 /investments   -> Investments (stub page)
@@ -194,7 +197,10 @@ client/
 
 ### Authentication Pages
 - **LoginForm.tsx** - Email/password login, Google OAuth button
-- **SignupForm.tsx** - Account creation form
+- **SignupForm.tsx** - Account creation form (prompts verification)
+- **VerifyEmail.tsx** - Handles verification code entry + resend
+- **ForgotPassword.tsx** - Requests password reset link
+- **ResetPassword.tsx** - Accepts reset token + new password
 
 ### Dashboard (Main Page)
 **Layout Components:**

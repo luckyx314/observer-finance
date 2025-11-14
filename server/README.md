@@ -4,7 +4,9 @@ NestJS-based REST API for the Observer Finance application with SQLite database 
 
 ## Features
 
-- JWT-based authentication
+- JWT-based authentication with bcrypt password hashing
+- Email verification via OTP codes (sent immediately after login) with resend support
+- Password reset links delivered via email
 - User registration and login
 - Transaction CRUD operations
 - SQLite database with TypeORM
@@ -43,6 +45,13 @@ cp .env.example .env
 ```env
 PORT=3100
 JWT_SECRET=your-secret-key-change-in-production
+APP_URL=http://localhost:5174
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-user
+SMTP_PASS=your-smtp-password
+MAIL_FROM="Observer Finance <no-reply@observerfinance.local>"
 ```
 
 ### Running the Application
@@ -85,7 +94,8 @@ Response:
     "id": 1,
     "email": "user@example.com",
     "firstName": "John",
-    "lastName": "Doe"
+    "lastName": "Doe",
+    "isEmailVerified": false
   }
 }
 ```
@@ -109,8 +119,67 @@ Response:
     "id": 1,
     "email": "user@example.com",
     "firstName": "John",
-    "lastName": "Doe"
+    "lastName": "Doe",
+    "isEmailVerified": false
   }
+}
+```
+
+#### Verify Email
+```http
+POST /api/auth/verify-email
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "code": "123456"
+}
+```
+
+Response:
+```json
+{
+  "access_token": "eyJhbGc...",
+  "user": {
+    "id": 1,
+    "email": "user@example.com"
+  }
+}
+```
+
+#### Resend Verification Code
+```http
+POST /api/auth/resend-verification
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+#### Forgot Password
+```http
+POST /api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+Response:
+```json
+{ "message": "Password reset link sent." }
+```
+
+#### Reset Password
+```http
+POST /api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "<reset_token_from_email>",
+  "password": "newStrongPassword"
 }
 ```
 
@@ -193,6 +262,11 @@ Authorization: Bearer <access_token>
 - `password` - Hashed password
 - `firstName` - Optional first name
 - `lastName` - Optional last name
+- `isEmailVerified` - Indicates whether the user confirmed their email
+- `emailVerificationCode` - Hashed verification code (nullable)
+- `emailVerificationCodeExpiresAt` - Verification code expiration timestamp
+- `passwordResetToken` - Hashed password reset token (nullable)
+- `passwordResetTokenExpiresAt` - Reset token expiration timestamp
 - `createdAt` - Timestamp
 - `updatedAt` - Timestamp
 

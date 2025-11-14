@@ -49,7 +49,7 @@ export function AppSidebar({ onTransactionCreated, ...props }: AppSidebarProps) 
                             <a href="#">
                                 <IconInnerShadowTop className="!size-5" />
                                 <span className="text-base font-semibold">
-                                    Observer.
+                                    Finx.
                                 </span>
                             </a>
                         </SidebarMenuButton>

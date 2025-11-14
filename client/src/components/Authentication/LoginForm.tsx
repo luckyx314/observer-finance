@@ -38,7 +38,13 @@ export default function LoginForm({
         try {
             const response = await authAPI.login(email, password);
             login(response.access_token, response.user);
-            toast.success("Login successful!");
+            if (!response.user.isEmailVerified) {
+                toast.success(
+                    "Login successful! Check your email for the verification code."
+                );
+            } else {
+                toast.success("Login successful!");
+            }
             navigate("/dashboard");
         } catch (error: any) {
             const errorMessage =
@@ -84,12 +90,12 @@ export default function LoginForm({
                                             <Label htmlFor="password">
                                                 Password
                                             </Label>
-                                            <a
-                                                href="#"
+                                            <Link
+                                                to="/forgot-password"
                                                 className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                                             >
                                                 Forgot your password?
-                                            </a>
+                                            </Link>
                                         </div>
                                         <Input
                                             id="password"

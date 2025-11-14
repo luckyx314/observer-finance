@@ -3,6 +3,7 @@ export interface User {
   email: string;
   firstName?: string;
   lastName?: string;
+  isEmailVerified?: boolean;
 }
 
 export interface LoginResponse {
@@ -10,9 +11,10 @@ export interface LoginResponse {
   user: User;
 }
 
-export interface RegisterResponse {
-  access_token: string;
-  user: User;
+export type RegisterResponse = LoginResponse;
+
+export interface ApiMessageResponse {
+  message: string;
 }
 
 export const TransactionType = {
