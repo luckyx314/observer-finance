@@ -6,14 +6,24 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS for frontend
+  const allowedOrigins = new Set([
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+    'https://finx.spoofl.com',
+    'https://www.finx.spoofl.com',
+  ]);
+
   app.enableCors({
-    origin: [
-      'http://localhost:5174',
-      'http://127.0.0.1:5174',
-      'https://finx.spoofl.com',
-      'https://www.finx.spoofl.com',
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, origin);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
